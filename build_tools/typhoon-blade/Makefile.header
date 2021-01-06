@@ -1,0 +1,119 @@
+# TODO : 里面只是个参考模板，需要针对我们特定的开发环境进行修改
+
+GCC_DIR = ./build_tools/gcc-5.3
+GCC_STL_DIR = ${GCC_DIR}/include/c++/5.3.0
+
+CLANG_DIR = ./build_tools/clang-4.0.0rc4
+CUDA_DIR = /usr/local/cuda
+LAYOUT_TOOL_DIR = build_tools/blade3/bin
+
+CC  = ${GCC_DIR}/bin/gcc
+CXX = ${GCC_DIR}/bin/g++
+AR  = ar rcs
+
+CPPFLAGS  = -D__STDC_FORMAT_MACROS -DUSE_SYMBOLIZE -DPIC -I.build/pb/c++ -Ithird_party/prebuilt/include -I./third_party -I./
+
+# COMPILE_FLAGS 设置的是对 C 和 C++ 都生效的那部分编译选项
+COMPILE_FLAGS  = -pthread -MMD -msse4 \
+            -fPIC \
+            -Wtrigraphs \
+            -Wuninitialized \
+            -Wwrite-strings \
+            -Wpointer-arith \
+            -Wmissing-include-dirs \
+						-Wno-unused-function \
+            -Wno-unused-parameter \
+						-Wno-ignored-qualifiers \
+            -Wno-missing-field-initializers
+# 下列选项会使很多第三方库编译失败, 只好暂时屏蔽掉
+#           -Wredundant-decls
+
+# 配合 blade, 警告当错误，对 //thirdparty 下代码不生效，对其他代码生效
+WARN_AS_ERROR = -Werror
+
+CFLAGS    = -std=gnu11 -D_GNU_SOURCE ${COMPILE_FLAGS} -Werror-implicit-function-declaration
+
+CXXFLAGS  = ${COMPILE_FLAGS} -std=gnu++14 \
+						-Wvla \
+            -Wnon-virtual-dtor \
+            -Woverloaded-virtual \
+            -Wno-invalid-offsetof \
+            -Werror=non-virtual-dtor
+
+# 注意: linker 对库的顺序敏感，不要随意更改库的顺序
+LDFLAGS  = -pthread \
+           -Lthird_party/prebuilt/lib \
+           -lidn -lssl -lcrypto -llzma -ldl -lrt
+
+# OPT_CFLAGS 和 OPT_CXXFLAGS, 分别针对 C 程序和 C++ 程序, 独立设置
+OPT_CC = ${CC}
+OPT_CXX = ${CXX}
+OPT_CPPFLAGS = ${CPPFLAGS} -I${GCC_STL_DIR} -DNDEBUG -DUSE_TCMALLOC=1 
+OPT_CFLAGS = ${CFLAGS} -O3 -ggdb3 -Wformat=2 -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free3 -Wframe-larger-than=65535 
+OPT_CXXFLAGS = ${CXXFLAGS} -O3 -ggdb3 -Wformat=2 -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -Wframe-larger-than=65535 
+# libunwind 一定要放在最后，libtcmalloc_and_profiler 一定要放在倒数第二
+OPT_LDFLAGS = ${LDFLAGS} -L${GCC_DIR}/lib64 -static-libstdc++ -ltcmalloc_and_profiler -lunwind
+OPT_EXE_LDFLAGS = ${OPT_LDFLAGS}
+
+# DBG_CFLAGS 和 DBG_CXXFLAGS, 分别针对 C 程序和 C++ 程序, 独立设置
+DBG_CC = ${CC}
+DBG_CXX = ${CXX}
+DBG_CPPFLAGS = ${CPPFLAGS} -I${GCC_STL_DIR} -DUSE_TCMALLOC=1 -D_GLIBCXX_DEBUG
+DBG_CFLAGS = ${CFLAGS} -ggdb3 -Wformat=2 -fno-inline -fno-omit-frame-pointer -fno-builtin -fno-optimize-sibling-calls -Wframe-larger-than=65535 
+DBG_CXXFLAGS = ${CXXFLAGS} -ggdb3 -Wformat=2 -fno-inline -fno-omit-frame-pointer -fno-builtin -fno-optimize-sibling-calls -Wframe-larger-than=65535 
+# libunwind 一定要放在最后，libtcmalloc_and_profiler 一定要放在倒数第二
+DBG_LDFLAGS = ${LDFLAGS} -L${GCC_DIR}/lib64 -static-libstdc++ -ltcmalloc_and_profiler -lunwind
+DBG_EXE_LDFLAGS = ${DBG_LDFLAGS}
+
+# include dirs for diag version (both diag_dbg and diag_opt)
+DIAG_CPPFLAGS = -I${CLANG_DIR}/include/c++/v1 -I${CLANG_DIR}/include
+DIAG_CFLAGS = -Wno-integer-overflow -Wno-deprecated-register -Wno-extern-c-compat -fsanitize=address
+DIAG_CXXFLAGS = -stdlib=libc++ -Wno-integer-overflow -Wno-deprecated-register -Wno-extern-c-compat -fsanitize=address
+DIAG_LDFLAGS = -L${CLANG_DIR}/lib -stdlib=libc++ -lunwind -fsanitize=address 
+
+# diagnosis optimized version
+DIAG_OPT_CC = ${CLANG_DIR}/bin/clang
+DIAG_OPT_CXX = ${CLANG_DIR}/bin/clang++
+DIAG_OPT_CPPFLAGS = ${CPPFLAGS} -DNDEBUG ${DIAG_CPPFLAGS}
+DIAG_OPT_CFLAGS = ${CFLAGS} ${DIAG_CFLAGS} -O3 -ggdb -fno-omit-frame-pointer
+DIAG_OPT_CXXFLAGS = ${CXXFLAGS} ${DIAG_CXXFLAGS} -O3 -ggdb -fno-omit-frame-pointer
+DIAG_OPT_LDFLAGS = ${LDFLAGS} ${DIAG_LDFLAGS}
+DIAG_OPT_EXE_LDFLAGS = ${DIAG_OPT_LDFLAGS} -lc++ -lc++abi
+
+# diagnosis debug version
+DIAG_DBG_CC = ${CLANG_DIR}/bin/clang
+DIAG_DBG_CXX = ${CLANG_DIR}/bin/clang++
+DIAG_DBG_CPPFLAGS = ${CPPFLAGS} ${DIAG_CPPFLAGS}
+DIAG_DBG_CFLAGS = ${CFLAGS} ${DIAG_CFLAGS} -O1 -ggdb -fno-omit-frame-pointer -fno-inline -fno-builtin
+DIAG_DBG_CXXFLAGS = ${CXXFLAGS} ${DIAG_CXXFLAGS} -O1 -ggdb -fno-omit-frame-pointer -fno-inline -fno-builtin
+DIAG_DBG_LDFLAGS = ${LDFLAGS} ${DIAG_LDFLAGS}
+DIAG_DBG_EXE_LDFLAGS = ${DIAG_DBG_LDFLAGS} -lc++ -lc++abi
+
+CPPLINT = python build_tools/lint/cpplint.py
+
+UNIT_TEST_OPTIONS= --undefok=log_dir --log_dir=./.glog
+
+PRINT = build_tools/blade3/color_print.py green
+PRINT_WARNING = build_tools/blade3/color_print.py yellow
+PRINT_ERROR = build_tools/blade3/color_print.py red
+
+default: dbg
+all: dbg opt diag_dbg diag_opt 
+test: dbg_test
+all_test: dbg_test opt_test diag_dbg_test diag_opt_test
+
+.PHONY: clean default all test all_test lint dbg_test opt_test 
+
+%.h:
+	@[ ! -f $@ ] && ${PRINT} && ${PRINT_ERROR} ".h file not found: $@" && ${PRINT_ERROR} "try to run 'make clean' before running 'make' again." && ${PRINT} && false
+
+.glog:
+	mkdir -p .glog
+
+dbg_test: .glog
+opt_test: .glog
+diag_dbg_test: .glog
+diag_opt_test: .glog
+
+clean:
+	rm -rf .build

@@ -1,0 +1,12 @@
+cc_binary(
+    name='parameter_extractor_stress_test',
+    srcs=[
+        'parameter_extractor_stress_test.cc',
+    ],
+    incs=[],
+    deps=[
+        "//thirdparty/folly:folly_base",
+        "//feature_master/parameter:parameter_extractor",
+        '#dl',
+    ]
+)

@@ -1,0 +1,58 @@
+<%!
+
+  Copyright 2016 Facebook, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%#type:void?%><%!
+%>folly::exception_wrapper <%service:name%>AsyncClient::recv_wrapped_<%function:name%>(::apache::thrift::ClientReceiveState& state) {
+<%/type:void?%>
+<%^type:void?%>
+folly::exception_wrapper <%service:name%>AsyncClient::recv_wrapped_<%function:name%>(<% > types/semi_type%>& _return, ::apache::thrift::ClientReceiveState& state) {
+<%/type:void?%>
+  if (state.isException()) {
+    return std::move(state.exception());
+  }
+  if (!state.buf()) {
+    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+  }
+
+  using result = <%service:name%>_<%function:name%>_presult;
+  constexpr auto const fname = "<%function:name%>";
+  switch (state.protocolId()) {
+    case apache::thrift::protocol::T_BINARY_PROTOCOL:
+    {
+      apache::thrift::BinaryProtocolReader reader;
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          fname, &reader, state<%^type:void?%>, _return<%/type:void?%>);
+    }
+    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
+    {
+      apache::thrift::CompactProtocolReader reader;
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          fname, &reader, state<%^type:void?%>, _return<%/type:void?%>);
+    }
+<%#service:frozen2?%>
+    case apache::thrift::protocol::T_FROZEN2_PROTOCOL:
+    {
+      apache::thrift::Frozen2ProtocolReader reader;
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          fname, &reader, state<%^type:void?%>, _return<%/type:void?%>);
+    }
+<%/service:frozen2?%>
+    default:
+    {
+    }
+  }
+  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+}

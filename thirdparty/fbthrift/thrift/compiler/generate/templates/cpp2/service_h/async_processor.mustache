@@ -1,0 +1,108 @@
+<%!
+
+  Copyright 2016 Facebook, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>class <%service:name%>AsyncProcessor : public <%#service:extends%><% > common/namespace_cpp2%><%service:name%>AsyncProcessor<%/service:extends%><%^service:extends%>::apache::thrift::GeneratedAsyncProcessor<%/service:extends%> {
+ public:
+  const char* getServiceName() override;
+<%#service:extends%>
+  using BaseAsyncProcessor = <% > common/namespace_cpp2%><%service:name%>AsyncProcessor;
+<%/service:extends%>
+<%^service:extends%>
+  using BaseAsyncProcessor = void;
+<%/service:extends%>
+<%#service:frozen2?%>
+  using HasFrozen2 = std::true_type;
+<%/service:frozen2?%>
+<%^service:frozen2?%>
+  using HasFrozen2 = std::false_type;
+<%/service:frozen2?%>
+ protected:
+  <%service:name%>SvIf* iface_;
+  folly::Optional<std::string> getCacheKey(folly::IOBuf* buf, apache::thrift::protocol::PROTOCOL_TYPES protType) override;
+ public:
+  void process(std::unique_ptr<apache::thrift::ResponseChannel::Request> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
+ protected:
+  bool isOnewayMethod(const folly::IOBuf* buf, const apache::thrift::transport::THeader* header) override;
+ private:
+  static std::unordered_set<std::string> onewayMethods_;
+  static std::unordered_map<std::string, int16_t> cacheKeyMap_;
+ public:
+  using BinaryProtocolProcessFunc = ProcessFunc<<%service:name%>AsyncProcessor, apache::thrift::BinaryProtocolReader>;
+  using BinaryProtocolProcessMap = ProcessMap<BinaryProtocolProcessFunc>;
+  static const <%service:name%>AsyncProcessor::BinaryProtocolProcessMap& getBinaryProtocolProcessMap();
+ private:
+  static const <%service:name%>AsyncProcessor::BinaryProtocolProcessMap binaryProcessMap_;
+ public:
+  using CompactProtocolProcessFunc = ProcessFunc<<%service:name%>AsyncProcessor, apache::thrift::CompactProtocolReader>;
+  using CompactProtocolProcessMap = ProcessMap<CompactProtocolProcessFunc>;
+  static const <%service:name%>AsyncProcessor::CompactProtocolProcessMap& getCompactProtocolProcessMap();
+ private:
+  static const <%service:name%>AsyncProcessor::CompactProtocolProcessMap compactProcessMap_;
+<%#service:frozen2?%>
+ public:
+  using Frozen2ProtocolProcessFunc = ProcessFunc<<%service:name%>AsyncProcessor, apache::thrift::Frozen2ProtocolReader>;
+  using Frozen2ProtocolProcessMap = ProcessMap<Frozen2ProtocolProcessFunc>;
+  static const <%service:name%>AsyncProcessor::Frozen2ProtocolProcessMap& getFrozen2ProtocolProcessMap();
+ private:
+  static const <%service:name%>AsyncProcessor::Frozen2ProtocolProcessMap frozen2ProcessMap_;
+<%/service:frozen2?%>
+ private:
+<%#service:functions%><%#function:returnType%>
+<%^function:eb%>
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void _processInThread_<%function:name%>(std::unique_ptr<apache::thrift::ResponseChannel::Request> req, std::unique_ptr<folly::IOBuf> buf, std::unique_ptr<ProtocolIn_> iprot, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+<%/function:eb%>
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void process_<%function:name%>(std::unique_ptr<apache::thrift::ResponseChannel::Request> req, std::unique_ptr<folly::IOBuf> buf, std::unique_ptr<ProtocolIn_> iprot,apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+<%#service:frozen2?%>
+<%^function:eb%>
+  void _processInThread_frozen2_<%function:name%>(std::unique_ptr<apache::thrift::ResponseChannel::Request> req, std::unique_ptr<folly::IOBuf> buf, std::unique_ptr<apache::thrift::Frozen2ProtocolReader> iprot, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+<%/function:eb%>
+  void process_frozen2_<%function:name%>(std::unique_ptr<apache::thrift::ResponseChannel::Request> req, std::unique_ptr<folly::IOBuf> buf, std::unique_ptr<apache::thrift::Frozen2ProtocolReader> iprot,apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+<%/service:frozen2?%>
+<%^function:oneway?%>
+  template <class ProtocolIn_, class ProtocolOut_>
+<%#type:void?%>
+  static folly::IOBufQueue return_<%function:name%>(int32_t protoSeqId, apache::thrift::ContextStack* ctx);
+<%/type:void?%>
+<%^type:void?%>
+  <%^type:deprecated_stream?%>
+    <%^type:stream?%>
+  static folly::IOBufQueue return_<%function:name%>(int32_t protoSeqId, apache::thrift::ContextStack* ctx, <% > types/type%> const& _return);
+    <%/type:stream?%>
+    <%#type:stream?%>
+  static apache::thrift::ResponseAndStream<folly::IOBufQueue, folly::IOBufQueue> return_<%function:name%>(int32_t protoSeqId, apache::thrift::ContextStack* ctx, <% > types/type%> _return);
+    <%/type:stream?%>
+  <%/type:deprecated_stream?%>
+  <%#type:deprecated_stream?%>
+    <%#type:streamElemType%>
+  static folly::IOBufQueue return_<%function:name%>(int32_t protoSeqId, apache::thrift::ContextStack* ctx, <% > types/type%> const& _return);
+    <%/type:streamElemType%>
+  <%/type:deprecated_stream?%>
+<%/type:void?%>
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_<%function:name%>(std::unique_ptr<apache::thrift::ResponseChannel::Request> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+<%/function:oneway?%>
+<%/function:returnType%><%/service:functions%>
+ public:
+  <%service:name%>AsyncProcessor(<%service:name%>SvIf* iface) :
+<%#service:extends%>
+      <% > common/namespace_cpp2%><%service:name%>AsyncProcessor(iface),
+<%/service:extends%>
+      iface_(iface) {}
+
+  virtual ~<%service:name%>AsyncProcessor() {}
+};

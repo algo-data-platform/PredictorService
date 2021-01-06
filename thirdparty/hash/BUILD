@@ -1,0 +1,50 @@
+cc_library(
+  name="hash",
+  srcs=[
+	  'smhasher/src/AvalancheTest.cpp',
+	  'smhasher/src/Bitslice.cpp',
+	  'smhasher/src/Bitvec.cpp',
+	  'smhasher/src/CityTest.cpp',
+	  'smhasher/src/City.cpp',
+	  'smhasher/src/crc.cpp',
+	  'smhasher/src/DifferentialTest.cpp',
+	  'smhasher/src/Hashes.cpp',
+	  'smhasher/src/KeysetTest.cpp',
+	  'smhasher/src/lookup3.cpp',
+	  'smhasher/src/md5.cpp',
+	  'smhasher/src/MurmurHash1.cpp',
+	  'smhasher/src/MurmurHash2.cpp',
+	  'smhasher/src/MurmurHash3.cpp',
+	  'smhasher/src/Platform.cpp',
+	  'smhasher/src/Random.cpp',
+	  'smhasher/src/sha1.cpp',
+	  'smhasher/src/SpeedTest.cpp',
+	  'smhasher/src/Spooky.cpp',
+	  'smhasher/src/SpookyTest.cpp',
+	  'smhasher/src/Stats.cpp',
+	  'smhasher/src/SuperFastHash.cpp',
+	  'smhasher/src/Types.cpp',
+	  'smhasher/src/PMurHash.c',
+	  'smhasher/src/xxhash.c',
+  ],
+  warning='no',
+)
+
+cc_library(
+  name="city_hash",
+  srcs=[
+	  'smhasher/src/CityTest.cpp',
+	  'smhasher/src/City.cpp',
+  ],
+  warning='no',
+)
+
+cc_binary(
+  name='smhasher_main',
+  srcs=[
+    'smhasher/src/main.cpp'
+  ],
+  deps=[
+    ':hash'
+  ]
+)

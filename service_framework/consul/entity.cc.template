@@ -1,0 +1,9 @@
+#include "service_framework/consul/entity.h"
+
+namespace service_framework {
+namespace consul {
+
+__SOURCE__DATA__
+
+}  // namespace consul
+}  // namespace service_framework

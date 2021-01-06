@@ -1,0 +1,9 @@
+cc_library(
+  name='xgboost_example_extract',
+      srcs=[
+        'xgboost_example_extract.cc',
+    ],
+    deps=[
+        '//predictor/server/model_manager/framework/fea_extract:fea_extract_interface',
+    ],
+)

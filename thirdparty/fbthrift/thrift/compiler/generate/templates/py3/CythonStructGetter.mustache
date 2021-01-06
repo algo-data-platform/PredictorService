@@ -1,0 +1,85 @@
+{{!
+
+  Copyright 2016 Facebook, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Included on Cython structs in properties for retrieving child values from
+that struct. Most types can be returned directly and converted to python objects
+by Cython. Complex objects need to be wrapped or decoded appropriately. Structs
+are special because we try to memoize their wrappers on the parent handler
+if they have been previously retrieved.
+
+}}{{#field:reference?}}{{!
+}}if self.__{{field:name}} is None:
+    if not deref(self._cpp_obj).{{field:name}}:
+        return None
+    {{#field:iobuf_ref?}}
+    self.__{{field:name}} = __iobuf.IOBuf.create(deref(self._cpp_obj).{{field:name}}.get(), self)
+    {{/field:iobuf_ref?}}{{^field:iobuf_ref?}}
+    {{! Use an aliasing constructor since the object we're returning is still
+        managed by the top-level object, possible via a unique_ptr }}
+    self.__{{field:name}} = {{> types/CythonPythonType}}.create(aliasing_constructor_{{field:name}}({{!
+      }}self._cpp_obj, {{!
+        If this is a shared_const ref, we cast away the constness as part of
+        creating the new object (since the new object needs a plain shared_ptr).
+        This is unsafe in theory but seems ok in practice, since we never modify
+        our underlying object.
+      }}{{#field:shared_const_ref?}}<{{> types/CythonCppType}}*>{{/field:shared_const_ref?}}{{!
+      }}(deref(self._cpp_obj).{{field:name}}.get())))
+    {{/field:iobuf_ref?}}
+return self.__{{field:name}}{{!
+}}{{/field:reference?}}{{!
+}}{{^field:reference?}}{{!
+}}{{#type:base?}}{{!
+  }}{{#field:iobuf?}}{{!
+  }}if self.__{{field:name}} is None:
+    self.__{{field:name}} = __iobuf.IOBuf.create(ptr_address(deref(self._cpp_obj).{{field:name}}), self)
+return self.__{{field:name}}{{!
+  }}{{/field:iobuf?}}{{^field:iobuf?}}{{!
+  }}return {{!
+  }}{{#type:bool?}}<pbool> {{/type:bool?}}{{!
+  }}{{#type:string?}}(<bytes>{{/type:string?}}{{!
+  }}self._cpp_obj.get().{{field:name}}{{!
+  }}{{#program:optionals?}}{{#field:optional?}}.value(){{/field:optional?}}{{/program:optionals?}}{{!
+  }}{{#type:string?}}).decode('UTF-8'){{/type:string?}}{{!
+}}{{/field:iobuf?}}{{/type:base?}}{{!
+}}{{#type:enum?}}{{!
+  }}return translate_cpp_enum_to_python({{!
+    }}{{> types/CythonPythonType}}, {{!
+    }}<int>({{!
+    }}deref(self._cpp_obj).{{field:name}}{{!
+    }}{{#program:optionals?}}{{#field:optional?}}.value(){{/field:optional?}}{{/program:optionals?}}{{!
+    }})){{!
+}}{{/type:enum?}}{{!
+}}{{#type:struct?}}{{!
+}}if self.__{{field:name}} is None:
+    self.__{{field:name}} = {{> types/CythonPythonType}}.create({{!
+      }}make_shared[{{> types/CythonCppType}}]({{!
+      }}deref(self._cpp_obj).{{field:name}}{{!
+      }}{{#program:optionals?}}{{#field:optional?}}.value(){{/field:optional?}}{{/program:optionals?}}{{!
+      }}))
+return self.__{{field:name}}{{!
+}}{{/type:struct?}}{{!
+}}{{#type:container?}}{{!
+}}if self.__{{field:name}} is None:
+    self.__{{field:name}} = {{> types/CythonPythonType}}.create({{!
+      }}make_shared[{{> types/CythonCppType}}]({{!
+      }}deref(self._cpp_obj).{{field:name}}{{!
+      }}{{#program:optionals?}}{{#field:optional?}}.value(){{/field:optional?}}{{/program:optionals?}}{{!
+      }}))
+return self.__{{field:name}}{{!
+}}{{/type:container?}}{{!
+}}{{/field:reference?}}

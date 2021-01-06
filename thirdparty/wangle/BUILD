@@ -1,0 +1,146 @@
+cc_library(
+    name="wangle",
+    srcs=[
+		'wangle/acceptor/Acceptor.cpp',
+		'wangle/acceptor/AcceptorHandshakeManager.cpp',
+		'wangle/acceptor/ConnectionManager.cpp',
+		'wangle/acceptor/EvbHandshakeHelper.cpp',
+		'wangle/acceptor/LoadShedConfiguration.cpp',
+		'wangle/acceptor/ManagedConnection.cpp',
+		'wangle/acceptor/SecureTransportType.cpp',
+		'wangle/acceptor/SocketOptions.cpp',
+		'wangle/acceptor/SSLAcceptorHandshakeHelper.cpp',
+		'wangle/acceptor/TLSPlaintextPeekingCallback.cpp',
+		'wangle/acceptor/TransportInfo.cpp',
+		'wangle/bootstrap/ServerBootstrap.cpp',
+		'wangle/channel/FileRegion.cpp',
+		'wangle/channel/Pipeline.cpp',
+		'wangle/client/ssl/SSLSessionCacheData.cpp',
+		'wangle/client/ssl/SSLSessionCacheUtils.cpp',
+		'wangle/client/ssl/SSLSessionCallbacks.cpp',
+		'wangle/codec/LengthFieldBasedFrameDecoder.cpp',
+		'wangle/codec/LengthFieldPrepender.cpp',
+		'wangle/codec/LineBasedFrameDecoder.cpp',
+		'wangle/deprecated/rx/Dummy.cpp',
+		'wangle/ssl/PasswordInFile.cpp',
+		'wangle/ssl/ServerSSLContext.cpp',
+		'wangle/ssl/SSLContextManager.cpp',
+		'wangle/ssl/SSLSessionCacheManager.cpp',
+		'wangle/ssl/SSLUtil.cpp',
+		'wangle/ssl/TLSTicketKeyManager.cpp',
+		'wangle/ssl/TLSCredProcessor.cpp',
+		'wangle/util/FilePoller.cpp',
+    ],
+	warning='no',
+	deps=[
+		'//thirdparty/folly:folly',
+		'//thirdparty/glog:glog',
+		'//thirdparty/gflags:gflags',
+		'//thirdparty/libevent:event',
+		'//thirdparty/boost:boost_context',
+		'//thirdparty/boost:boost_chrono',
+		'//thirdparty/boost:boost_date_time',
+		'//thirdparty/boost:boost_filesystem',
+		'//thirdparty/boost:boost_program_options',
+		'//thirdparty/boost:boost_regex',
+		'//thirdparty/boost:boost_system',
+		'//thirdparty/boost:boost_thread',
+		'//thirdparty/double-conversion:double-conversion',
+		'//thirdparty/openssl:ssl',
+		'#pthread',
+		'#dl',
+	]
+)
+
+cc_test(
+	name="test",
+	srcs=[
+		'wangle/acceptor/test/AcceptorTest.cpp',
+		'wangle/acceptor/test/ConnectionManagerTest.cpp',
+		'wangle/acceptor/test/LoadShedConfigurationTest.cpp',
+		'wangle/acceptor/test/PeekingAcceptorHandshakeHelperTest.cpp',
+		'wangle/bootstrap/test/BootstrapTest.cpp',
+		'wangle/channel/broadcast/test/BroadcastHandlerTest.cpp',
+		'wangle/channel/broadcast/test/BroadcastPoolTest.cpp',
+		'wangle/channel/broadcast/test/ObservingHandlerTest.cpp',
+		'wangle/channel/test/AsyncSocketHandlerTest.cpp',
+		'wangle/channel/test/OutputBufferingHandlerTest.cpp',
+		'wangle/channel/test/PipelineTest.cpp',
+		'wangle/codec/test/CodecTest.cpp',
+		'wangle/deprecated/rx/test/RxTest.cpp',
+		'wangle/ssl/test/SSLContextManagerTest.cpp',
+	],
+	deps=[
+		':wangle',
+		'#unwind'
+	],
+	warning='no'
+)
+
+cc_binary(
+	name="EchoServer",
+	srcs=[
+		'wangle/example/echo/EchoServer.cpp'
+	],
+	deps=[
+		':wangle',
+		'#unwind'
+	],
+	warning='no'
+)
+
+cc_binary(
+	name="TelnetClient",
+	srcs=[
+		'wangle/example/telnet/TelnetClient.cpp'
+	],
+	deps=[
+		':wangle',
+		'#unwind'
+	],
+	warning='no'
+)
+cc_binary(
+	name="TelnetServer",
+	srcs=[
+		'wangle/example/telnet/TelnetServer.cpp'
+	],
+	deps=[
+		':wangle',
+		'#unwind'
+	],
+	warning='no'
+)
+cc_binary(
+	name="ProxyServer",
+	srcs=[
+		'wangle/example/proxy/Proxy.cpp'
+	],
+	deps=[
+		':wangle',
+		'#unwind'
+	],
+	warning='no'
+)
+cc_binary(
+	name="AcceptServer",
+	srcs=[
+		'wangle/example/accept_steering/accept_steering_server.cpp'
+	],
+	deps=[
+		':wangle',
+		'#unwind'
+	],
+	warning='no'
+)
+cc_binary(
+	name="BroadcastProxy",
+	srcs=[
+		'wangle/example/broadcast/BroadcastProxy.cpp'
+	],
+	deps=[
+		':wangle',
+		'#unwind'
+	],
+	warning='no'
+)

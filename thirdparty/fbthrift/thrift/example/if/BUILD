@@ -1,0 +1,11 @@
+fbthrift_library(
+    name="chatroom",
+    srcs=[
+        'chatroom.thrift'
+    ],
+    options='reflection',
+    include_prefix='thrift/example/if',
+	deps=[
+		'//thirdparty/fbthrift:thrift1'
+	]
+)

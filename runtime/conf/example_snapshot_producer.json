@@ -1,0 +1,10 @@
+{
+  "example_snapshot_kafka_config" : {
+    "kafka_config" :[
+      "metadata.broker.list",
+      "127.0.0.1:<PORT>"
+      ],
+    "topic" : "<TOPIC>",
+    "partition_num" : -1
+  }
+}

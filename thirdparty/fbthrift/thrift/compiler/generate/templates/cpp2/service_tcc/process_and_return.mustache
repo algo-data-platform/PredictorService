@@ -1,0 +1,290 @@
+<%!
+
+  Copyright 2016 Facebook, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%#service:functions%><%#function:returnType%>
+<%^function:eb%>
+template <typename ProtocolIn_, typename ProtocolOut_>
+void <%service:name%>AsyncProcessor::_processInThread_<%function:name%>(std::unique_ptr<apache::thrift::ResponseChannel::Request> req, std::unique_ptr<folly::IOBuf> buf, std::unique_ptr<ProtocolIn_> iprot, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  auto pri = iface_->getRequestPriority(ctx, apache::thrift::concurrency::<%function:priority%>);
+<%^function:oneway?%>
+  <%^function:returns_stream?%>
+  processInThread<ProtocolIn_, ProtocolOut_>(std::move(req), std::move(buf),std::move(iprot), ctx, eb, tm, pri, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, &<%service:name%>AsyncProcessor::process_<%function:name%><ProtocolIn_, ProtocolOut_>, this);
+  <%/function:returns_stream?%>
+  <%#function:returns_stream?%>
+  processInThread<ProtocolIn_, ProtocolOut_>(std::move(req), std::move(buf),std::move(iprot), ctx, eb, tm, pri, apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE, &<%service:name%>AsyncProcessor::process_<%function:name%><ProtocolIn_, ProtocolOut_>, this);
+  <%/function:returns_stream?%>
+<%/function:oneway?%>
+<%#function:oneway?%>
+  processInThread<ProtocolIn_, ProtocolOut_>(std::move(req), std::move(buf),std::move(iprot), ctx, eb, tm, pri, apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE, &<%service:name%>AsyncProcessor::process_<%function:name%><ProtocolIn_, ProtocolOut_>, this);
+<%/function:oneway?%>
+}
+<%/function:eb%>
+template <typename ProtocolIn_, typename ProtocolOut_>
+void <%service:name%>AsyncProcessor::process_<%function:name%>(std::unique_ptr<apache::thrift::ResponseChannel::Request> req, std::unique_ptr<folly::IOBuf> buf, std::unique_ptr<ProtocolIn_> iprot,apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+<%#function:oneway?%><%#function:eb%>
+  if (!req->isOneway()) {
+    if (req->isStream()) {
+      req->sendStreamReply({std::unique_ptr<folly::IOBuf>(), {}});
+    } else {
+      req->sendReply(std::unique_ptr<folly::IOBuf>());
+    }
+  }
+<%/function:eb%><%/function:oneway?%>
+  // make sure getConnectionContext is null
+  // so async calls don't accidentally use it
+  iface_->setConnectionContext(nullptr);
+  <%#function:takes_stream?%>
+  <%service:name%>_<%function:name%>_pargs::FieldsType args;
+  <%/function:takes_stream?%>
+  <%^function:takes_stream?%>
+  <%service:name%>_<%function:name%>_pargs args;
+  <%/function:takes_stream?%>
+<%#function:args_without_streams%><%#field:type%>
+<%^type:resolves_to_complex_return?%>
+<%^type:enum?%>
+  <% > types/type%> uarg_<%field:name%>{0};
+<%/type:enum?%>
+<%#type:enum?%>
+  <% > types/type%> uarg_<%field:name%>{static_cast<<% > types/type%>>(0)};
+<%/type:enum?%>
+  args.get<<%field:index%>>().value = &uarg_<%field:name%>;
+<%/type:resolves_to_complex_return?%>
+<%#type:resolves_to_complex_return?%>
+  auto uarg_<%field:name%> = std::make_unique<<% > types/type%>>();
+  args.get<<%field:index%>>().value = uarg_<%field:name%>.get();
+<%/type:resolves_to_complex_return?%>
+<%/field:type%><%/function:args_without_streams%>
+  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "<%service:name%>.<%function:name%>", ctx));
+  try {
+    deserializeRequest(args, buf.get(), iprot.get(), ctxStack.get());
+  }
+  catch (const std::exception& ex) {
+<%#function:oneway?%>
+    LOG(ERROR) << ex.what() << " in function <%function:name%>";
+    return;
+  }
+  auto callback = std::make_unique<apache::thrift::HandlerCallbackBase>(std::move(req), std::move(ctxStack), nullptr, eb, tm, ctx);
+<%/function:oneway?%>
+<%^function:oneway?%>
+    ProtocolOut_ prot;
+    if (req) {
+      LOG(ERROR) << ex.what() << " in function <%function:name%>";
+      apache::thrift::TApplicationException x(apache::thrift::TApplicationException::TApplicationExceptionType::PROTOCOL_ERROR, ex.what());
+      folly::IOBufQueue queue = serializeException("<%function:name%>", &prot, ctx->getProtoSeqId(), nullptr, x);
+      queue.append(apache::thrift::transport::THeader::transform(queue.move(), ctx->getHeader()->getWriteTransforms(), ctx->getHeader()->getMinCompressBytes()));
+      eb->runInEventBaseThread([queue = std::move(queue), req = std::move(req)]() mutable {
+        if (req->isStream()) {
+          req->sendStreamReply({queue.move(), {}});
+        } else {
+          req->sendReply(queue.move());
+        }
+      }
+      );
+      return;
+    }
+    else {
+      LOG(ERROR) << ex.what() << " in oneway function <%function:name%>";
+    }
+  }
+  <%#function:takes_stream?%>
+  auto inputStream = apache::thrift::detail::ap::decode_stream<
+      ProtocolIn_, <%service:name%>_<%function:name%>_pargs::StreamPResultType,
+      <%#function:takenStreamType%><%#type:streamElemType%><% > types/type %><%/type:streamElemType%><%/function:takenStreamType%>>(req->extractStream());
+  <%/function:takes_stream?%>
+<%^type:resolves_to_complex_return?%>
+  <%^type:deprecated_stream?%>
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<<% > types/type%>>>(std::move(req), std::move(ctxStack), return_<%function:name%><ProtocolIn_,ProtocolOut_>, throw_wrapped_<%function:name%><ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+  <%/type:deprecated_stream?%>
+  <%#type:deprecated_stream?%>
+    <%#type:streamElemType%>
+      <%#type:resolves_to_complex_return?%>
+  auto callback = std::make_unique<apache::thrift::StreamingHandlerCallback<<% > types/unique_ptr_type%>>>(std::move(req), std::move(ctxStack), return_<%function:name%><ProtocolIn_,ProtocolOut_>, throw_wrapped_<%function:name%><ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+      <%/type:resolves_to_complex_return?%>
+      <%^type:resolves_to_complex_return?%>
+  auto callback = std::make_unique<apache::thrift::StreamingHandlerCallback<<% > types/type%>>>(std::move(req), std::move(ctxStack), return_<%function:name%><ProtocolIn_,ProtocolOut_>, throw_wrapped_<%function:name%><ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+      <%/type:resolves_to_complex_return?%>
+    <%/type:streamElemType%>
+  <%/type:deprecated_stream?%>
+<%/type:resolves_to_complex_return?%>
+<%#type:resolves_to_complex_return?%>
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<<% > types/unique_ptr_type%>>>(std::move(req), std::move(ctxStack), return_<%function:name%><ProtocolIn_,ProtocolOut_>, throw_wrapped_<%function:name%><ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+<%/type:resolves_to_complex_return?%>
+<%^function:eb%>
+  if (!callback->isRequestActive()) {
+    callback.release()->deleteInThread();
+    return;
+  }
+<%/function:eb%>
+<%/function:oneway?%>
+  ctx->setStartedProcessing();
+  <%#function:takes_stream?%>
+  iface_-><%#function:eb%>async_eb<%/function:eb%><%^function:eb%>async_tm<%/function:eb%>_<%function:name%>(std::move(callback), std::move(inputStream)<% > service_tcc/get_args_ref%>);
+  <%/function:takes_stream?%>
+  <%^function:takes_stream?%>
+  iface_-><%#function:eb%>async_eb<%/function:eb%><%^function:eb%>async_tm<%/function:eb%>_<%function:name%>(std::move(callback)<% > service_tcc/get_args_ref%>);
+  <%/function:takes_stream?%>
+}
+
+<%^function:oneway?%>
+template <class ProtocolIn_, class ProtocolOut_>
+<%#type:void?%>
+folly::IOBufQueue <%service:name%>AsyncProcessor::return_<%function:name%>(int32_t protoSeqId, apache::thrift::ContextStack* ctx) {
+<%/type:void?%>
+<%^type:void?%>
+  <%^type:deprecated_stream?%>
+    <%^type:stream?%>
+folly::IOBufQueue <%service:name%>AsyncProcessor::return_<%function:name%>(int32_t protoSeqId, apache::thrift::ContextStack* ctx, <% > types/type%> const& _return) {
+    <%/type:stream?%>
+    <%#type:stream?%>
+apache::thrift::ResponseAndStream<folly::IOBufQueue, folly::IOBufQueue> <%service:name%>AsyncProcessor::return_<%function:name%>(int32_t protoSeqId, apache::thrift::ContextStack* ctx, <% > types/type%> _return) {
+    <%/type:stream?%>
+  <%/type:deprecated_stream?%>
+  <%#type:deprecated_stream?%>
+    <%#type:streamElemType%>
+folly::IOBufQueue <%service:name%>AsyncProcessor::return_<%function:name%>(int32_t protoSeqId, apache::thrift::ContextStack* ctx, <% > types/type%> const& _return) {
+    <%/type:streamElemType%>
+  <%/type:deprecated_stream?%>
+<%/type:void?%>
+  ProtocolOut_ prot;
+  <%#function:returns_stream?%>
+  <%service:name%>_<%function:name%>_presult::FieldsType result;
+  <%/function:returns_stream?%>
+  <%^function:returns_stream?%>
+  <%service:name%>_<%function:name%>_presult result;
+  <%/function:returns_stream?%>
+<%^type:void?%>
+  <%^type:deprecated_stream?%>
+    <%^function:returns_stream?%>
+  result.get<0>().value = const_cast<<% > types/type%>*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse("<%function:name%>", &prot, protoSeqId, ctx, result);
+    <%/function:returns_stream?%>
+    <%#function:returns_stream?%>
+  using StreamPResultType = <%service:name%>_<%function:name%>_presult::StreamPResultType;
+      <%#type:extratype?%>
+  result.get<0>().value = const_cast<<% > types/type%>::ResponseType*>(&_return.response);
+  result.setIsSet(0, true);
+  auto& _returnStream = _return.stream;
+      <%/type:extratype?%>
+      <%^type:extratype?%>
+  auto& _returnStream = _return;
+      <%/type:extratype?%>
+
+      <%#function:stream_exceptions?%>
+  auto exMap = [](StreamPResultType& res, folly::exception_wrapper ew) {
+      <%/function:stream_exceptions?%>
+      <%^function:stream_exceptions?%>
+  auto exMap = [](StreamPResultType&, folly::exception_wrapper) {
+      <%/function:stream_exceptions?%>
+      <%#function:stream_exceptions%>
+    if (ew.with_exception([&](<%#field:type%><% > common/type_namespace_cpp2%><%type:name%><%/field:type%>& e) {
+          res.get<<%field:index_plus_one%>>().ref() = e;
+          res.setIsSet(<%field:index_plus_one%>, true);
+        })) {
+      return true;
+    }
+      <%/function:stream_exceptions%>
+    return false;
+  };
+
+  auto _encodedStream = apache::thrift::detail::ap::encode_stream<ProtocolOut_, StreamPResultType>(std::move(_returnStream), std::move(exMap));
+  return {serializeResponse("<%function:name%>", &prot, protoSeqId, ctx, result), std::move(_encodedStream)};
+    <%/function:returns_stream?%>
+  <%/type:deprecated_stream?%>
+  <%#type:deprecated_stream?%>
+    <%#type:streamElemType%>
+  result.get<0>().value = const_cast<<% > types/type%>*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse("<%function:name%>", &prot, protoSeqId, ctx, result);
+    <%/type:streamElemType%>
+  <%/type:deprecated_stream?%>
+<%/type:void?%>
+<%#type:void?%>
+  return serializeResponse("<%function:name%>", &prot, protoSeqId, ctx, result);
+<%/type:void?%>
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void <%service:name%>AsyncProcessor::throw_wrapped_<%function:name%>(std::unique_ptr<apache::thrift::ResponseChannel::Request> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  ProtocolOut_ prot;
+<%#function:exceptions?%>
+  <%service:name%>_<%function:name%>_presult result;
+<%/function:exceptions?%>
+<%#function:exceptions%>
+  if (ew.with_exception([&](<%#field:type%><% > common/type_namespace_cpp2%><%type:name%><%/field:type%>& e) {
+    ctx->userExceptionWrapped(true, ew);
+<%#type:void?%>
+    result.get<<%field:index%>>().ref() = e;
+    result.setIsSet(<%field:index%>, true);
+<%/type:void?%>
+<%^type:void?%>
+  <%^function:returns_stream?%>
+    result.get<<%field:index_plus_one%>>().ref() = e;
+    result.setIsSet(<%field:index_plus_one%>, true);
+  <%/function:returns_stream?%>
+  <%#function:returns_stream?%>
+  <%#type:extratype?%>
+    result.fields.get<<%field:index_plus_one%>>().ref() = e;
+    result.fields.setIsSet(<%field:index_plus_one%>, true);
+  <%/type:extratype?%>
+  <%^type:extratype?%>
+    result.fields.get<<%field:index%>>().ref() = e;
+    result.fields.setIsSet(<%field:index%>, true);
+  <%/type:extratype?%>
+  <%/function:returns_stream?%>
+<%/type:void?%>
+  }
+  )) {} else
+<%/function:exceptions%>
+   {
+    if (req) {
+      LOG(ERROR) << ew << " in function <%function:name%>";
+      apache::thrift::TApplicationException x(ew.what().toStdString());
+      ctx->userExceptionWrapped(false, ew);
+      ctx->handlerErrorWrapped(ew);
+      folly::IOBufQueue queue = serializeException("<%function:name%>", &prot, protoSeqId, ctx, x);
+      queue.append(apache::thrift::transport::THeader::transform(queue.move(), reqCtx->getHeader()->getWriteTransforms(), reqCtx->getHeader()->getMinCompressBytes()));
+      <%^function:returns_stream?%>
+      req->sendReply(queue.move());
+      <%/function:returns_stream?%>
+      <%#function:returns_stream?%>
+      req->sendStreamReply({queue.move(), {}});
+      <%/function:returns_stream?%>
+      return;
+    }
+    else {
+      LOG(ERROR) << ew << " in oneway function <%function:name%>";
+    }
+  }
+<%#function:exceptions?%>
+  <%^function:returns_stream?%>
+  auto queue = serializeResponse("<%function:name%>", &prot, protoSeqId, ctx, result);
+  queue.append(apache::thrift::transport::THeader::transform(queue.move(), reqCtx->getHeader()->getWriteTransforms(), reqCtx->getHeader()->getMinCompressBytes()));
+  return req->sendReply(queue.move());
+  <%/function:returns_stream?%>
+  <%#function:returns_stream?%>
+  auto queue = serializeResponse("<%function:name%>", &prot, protoSeqId, ctx, result.fields);
+  queue.append(apache::thrift::transport::THeader::transform(queue.move(), reqCtx->getHeader()->getWriteTransforms(), reqCtx->getHeader()->getMinCompressBytes()));
+  return req->sendStreamReply({queue.move(), {}});
+  <%/function:returns_stream?%>
+<%/function:exceptions?%>
+}
+
+<%/function:oneway?%>
+<%/function:returnType%><%/service:functions%>

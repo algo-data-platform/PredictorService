@@ -1,0 +1,56 @@
+{
+  "thrift_module" : "service",
+  "typedefs" : {
+    "IncludesIncluded" : {
+      "lineno" : 13,
+      "type_enum" : "STRUCT",
+      "spec_args" : "includes.Included"
+    },
+    "IncludesTransitiveFoo" : {
+      "lineno" : 15,
+      "type_enum" : "TYPEDEF",
+      "spec_args" : "includes.TransitiveFoo"
+    }
+  },
+  "services" : {
+    "MyService" : {
+      "lineno" : 6,
+      "functions" : {
+        "MyService.query" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "STRUCT",
+              "spec_args" : "module.MyStruct"
+            },
+            {
+              "type_enum" : "STRUCT",
+              "spec_args" : "includes.Included"
+            }
+          ],
+          "throws" : []
+        },
+        "MyService.has_arg_docs" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "type_enum" : "STRUCT",
+              "spec_args" : "module.MyStruct"
+            },
+            {
+              "type_enum" : "STRUCT",
+              "spec_args" : "includes.Included"
+            }
+          ],
+          "throws" : []
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+1.1.7
+
+需要使用 cmake 生成文件
+config.h
+snappy-stubs-public.h

@@ -1,0 +1,40 @@
+<%!
+
+  Copyright 2016 Facebook, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><%#struct:fields?%><%#struct:fields%><%#field:type%><%#type:resolves_to_container_or_struct?%>
+<%^type:optionals?%><%^type:no_getters_setters?%>
+<%#field:optional?%><%^field:cpp_ref?%>
+const <% > types/type%>* <%struct:name%>::get_<%field:name%>() const& {
+  return __isset.<%field:name%> ? std::addressof(<%field:name%>) : nullptr;
+}
+
+<% > types/type%>* <%struct:name%>::get_<%field:name%>() & {
+  return __isset.<%field:name%> ? std::addressof(<%field:name%>) : nullptr;
+}
+
+<%/field:cpp_ref?%><%/field:optional?%>
+<%^field:optional?%><%^field:cpp_ref?%>
+const <% > types/type%>& <%struct:name%>::get_<%field:name%>() const& {
+  return <%field:name%>;
+}
+
+<% > types/type%> <%struct:name%>::get_<%field:name%>() && {
+  return std::move(<%field:name%>);
+}
+
+<%/field:cpp_ref?%><%/field:optional?%>
+<%/type:no_getters_setters?%><%/type:optionals?%>
+<%/type:resolves_to_container_or_struct?%><%/field:type%><%/struct:fields%><%/struct:fields?%>

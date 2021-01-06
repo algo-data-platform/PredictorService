@@ -1,0 +1,16 @@
+cc_library(
+    name="mstch",
+    srcs=[
+		'src/state/in_section.cpp',
+		'src/state/outside_section.cpp',
+		'src/mstch.cpp',
+		'src/render_context.cpp',
+		'src/template_type.cpp',
+		'src/token.cpp',
+		'src/utils.cpp',
+    ],
+	warning='no',
+	incs=[
+		'src'
+	]
+)

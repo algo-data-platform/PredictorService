@@ -1,0 +1,334 @@
+# thrift compiler
+cc_library(
+	name="compiler_ast",
+	srcs=[
+		'thrift/compiler/parse/t_program.cc',
+		'thrift/compiler/parse/t_type.cc',
+		'thrift/compiler/parse/t_typedef.cc'
+	],
+	deps=[
+		'//thirdparty/openssl:ssl',
+	]
+)
+
+lex_yacc_library(
+	name='parser',
+	srcs=[
+		'thrift/compiler/thriftl.ll',
+		'thrift/compiler/thrifty.yy',
+	],
+	defs=[
+		'THRIFTY_HH=\\\"thirdparty/fbthrift/thrift/compiler/thrifty.yy.hh\\\"',
+	],
+	allow_undefined=True,
+	warning='no'
+)
+
+cc_library(
+	name="compiler_base",
+	srcs=[
+		'thrift/compiler/common.cc',
+		'thrift/compiler/platform.cc',
+	],
+	deps=[
+		':compiler_ast',
+		':parser',
+		'//thirdparty/boost:boost_filesystem',
+		'//thirdparty/boost:boost_system',
+	],
+	warning='no'
+)
+
+cc_library(
+	name="compiler_generators",
+	srcs=[
+		'thrift/compiler/generate/common.cc',
+		'thrift/compiler/generate/t_android_lite_generator.cc',
+		'thrift/compiler/generate/t_cocoa_generator.cc',
+		'thrift/compiler/generate/t_concat_generator.cc',
+		'thrift/compiler/generate/t_csharp_generator.cc',
+		'thrift/compiler/generate/t_d_generator.cc',
+		'thrift/compiler/generate/t_erl_generator.cc',
+		'thrift/compiler/generate/t_generator.cc',
+		'thrift/compiler/generate/t_go_generator.cc',
+		'thrift/compiler/generate/t_hack_generator.cc',
+		'thrift/compiler/generate/t_hs_generator.cc',
+		'thrift/compiler/generate/t_html_generator.cc',
+		'thrift/compiler/generate/t_java_generator.cc',
+		'thrift/compiler/generate/t_js_generator.cc',
+		'thrift/compiler/generate/t_json_experimental_generator.cc',
+		'thrift/compiler/generate/t_json_generator.cc',
+		'thrift/compiler/generate/t_mstch_cpp2_generator.cc',
+		'thrift/compiler/generate/t_mstch_generator.cc',
+		'thrift/compiler/generate/t_mstch_html_generator.cc',
+		'thrift/compiler/generate/t_mstch_objects.cc',
+		'thrift/compiler/generate/t_mstch_py3_generator.cc',
+		'thrift/compiler/generate/t_mstch_pyi_generator.cc',
+		'thrift/compiler/generate/t_mstch_swift_generator.cc',
+		'thrift/compiler/generate/t_ocaml_generator.cc',
+		'thrift/compiler/generate/t_perl_generator.cc',
+		'thrift/compiler/generate/t_php_generator.cc',
+		'thrift/compiler/generate/t_py_generator.cc',
+		'thrift/compiler/generate/t_rb_generator.cc',
+		'thrift/compiler/generate/t_st_generator.cc',
+	],
+	link_all_symbols=True,
+	deps=[
+		':compiler_base',
+		'//thirdparty/mstch:mstch',
+		'//thirdparty/boost:boost_filesystem',
+		'//thirdparty/boost:boost_system',
+	],
+	warning='no'
+)
+
+cc_binary(
+	name='thrift1',
+	srcs=[
+		'thrift/compiler/main.cc',
+		'thrift/compiler/mutator.cc',
+		'thrift/compiler/validator.cc',
+		'thrift/compiler/visitor.cc'
+	],
+	deps=[
+		':compiler_base',
+		':compiler_generators',
+		'#dl'
+	],
+	warning='no'
+)
+
+
+# thrift lib
+cc_library(
+	name='thrift-core',
+	srcs=[
+		'thrift/lib/cpp/Thrift.cpp',
+	],
+	deps=[
+		'//thirdparty/folly:folly',
+		':thrift1',
+	],
+	warning='no'
+)
+
+cc_library(
+	name='concurrency',
+	srcs=[
+		'thrift/lib/cpp/concurrency/Mutex.cpp',
+		'thrift/lib/cpp/concurrency/Monitor.cpp',
+		'thrift/lib/cpp/concurrency/PosixThreadFactory.cpp',
+		'thrift/lib/cpp/concurrency/ThreadManager.cpp',
+		'thrift/lib/cpp/concurrency/TimerManager.cpp',
+		'thrift/lib/cpp/concurrency/Util.cpp',
+	],
+	deps=[
+		'//thirdparty/folly:folly',
+		'//thirdparty/gflags:gflags',
+		'//thirdparty/glog:glog',
+	],
+	warning='no'
+)
+
+cc_library(
+	name='protocol',
+	srcs=[
+		'thrift/lib/cpp/protocol/TDebugProtocol.cpp',
+		'thrift/lib/cpp/protocol/TJSONProtocol.cpp',
+		'thrift/lib/cpp/protocol/TBase64Utils.cpp',
+		'thrift/lib/cpp/protocol/TProtocolException.cpp',
+		'thrift/lib/cpp/protocol/TSimpleJSONProtocol.cpp',
+	],
+	deps=[
+		'//thirdparty/folly:folly',
+		'//thirdparty/glog:glog',
+		'//thirdparty/fbthrift/thrift/lib/thrift:reflection',
+		'//thirdparty/fbthrift:thrift1'
+	],
+	warning='no'
+)
+
+cc_library(
+	name='transport',
+	srcs=[
+		'thrift/lib/cpp/transport/TTransportException.cpp',
+		'thrift/lib/cpp/transport/TFDTransport.cpp',
+		'thrift/lib/cpp/transport/THeaderTransport.cpp',
+		'thrift/lib/cpp/transport/THttpTransport.cpp',
+		'thrift/lib/cpp/transport/THttpClient.cpp',
+		'thrift/lib/cpp/transport/THttpServer.cpp',
+		'thrift/lib/cpp/transport/TSocket.cpp',
+		'thrift/lib/cpp/transport/TServerSocket.cpp',
+		'thrift/lib/cpp/transport/TBufferTransports.cpp',
+		'thrift/lib/cpp/transport/THeader.cpp',
+		'thrift/lib/cpp/transport/TZlibTransport.cpp',
+		'thrift/lib/cpp/util/FdUtils.cpp',
+		'thrift/lib/cpp/util/PausableTimer.cpp',
+		'thrift/lib/cpp/util/THttpParser.cpp',
+		'thrift/lib/cpp/util/VarintUtils.cpp',
+	],
+	deps=[
+		':concurrency',
+		':thrift-core',
+		'//thirdparty/folly:folly',
+		'//thirdparty/openssl:ssl',
+		'//thirdparty/zlib:z',
+		'//thirdparty/zstd:zstd',
+	]
+)
+
+cc_library(
+	name='async',
+	srcs=[
+		'thrift/lib/cpp/EventHandlerBase.cpp',
+		'thrift/lib/cpp/async/TAsyncSocketFactory.cpp',
+		'thrift/lib/cpp/async/TAsyncSSLSocketFactory.cpp',
+		'thrift/lib/cpp/async/TBinaryAsyncChannel.cpp',
+		'thrift/lib/cpp/async/TFramedAsyncChannel.cpp',
+		'thrift/lib/cpp/async/THeaderAsyncChannel.cpp',
+		'thrift/lib/cpp/async/THttpAsyncChannel.cpp',
+		'thrift/lib/cpp/async/TUnframedAsyncChannel.cpp',
+		'thrift/lib/cpp/async/TZlibAsyncChannel.cpp',
+		'thrift/lib/cpp/server/TServerObserver.cpp',
+	],
+	deps=[
+		':concurrency',
+		':transport',
+		'//thirdparty/folly:folly',
+	],
+	warning='no'
+)
+
+cc_library(
+	name='thrift',
+	srcs=[
+		'thrift/lib/cpp/VirtualProfiling.cpp',
+	],
+	deps=[
+		':async',
+		':concurrency',
+		':protocol',
+		':transport',
+	],
+	warning='no'
+)
+
+cc_library(
+	name='thriftfrozen2',
+	srcs=[
+		'thrift/lib/cpp2/frozen/Frozen.cpp',
+		'thrift/lib/cpp2/frozen/FrozenUtil.cpp',
+		'thrift/lib/cpp2/frozen/schema/MemorySchema.cpp',
+		'thrift/lib/cpp2/protocol/Frozen2Protocol.cpp',
+	],
+	deps=[
+		'//thirdparty/fbthrift/thrift/lib/thrift:frozen',
+		'//thirdparty/folly:folly',
+	],
+	warning='no'
+)
+
+cc_library(
+	name='thriftprotocol',
+	srcs=[
+		'thrift/lib/cpp2/protocol/BinaryProtocol.cpp',
+		'thrift/lib/cpp2/protocol/CompactProtocol.cpp',
+		'thrift/lib/cpp2/protocol/CompactV1Protocol.cpp',
+		'thrift/lib/cpp2/protocol/DebugProtocol.cpp',
+		'thrift/lib/cpp2/protocol/JSONProtocolCommon.cpp',
+		'thrift/lib/cpp2/protocol/JSONProtocol.cpp',
+		'thrift/lib/cpp2/protocol/Serializer.cpp',
+		'thrift/lib/cpp2/protocol/SimpleJSONProtocol.cpp',
+		'thrift/lib/cpp2/protocol/VirtualProtocol.cpp',
+	],
+	deps=[
+		':thrift',
+		'//thirdparty/wangle:wangle',
+	],
+	warning='no'
+)
+
+cc_library(
+	name='security',
+	srcs=[
+		'thrift/lib/cpp2/util/kerberos/Krb5Util.cpp',
+		'thrift/lib/cpp2/util/kerberos/Krb5OlderVersionStubs.cpp',
+		'thrift/lib/cpp2/util/kerberos/Krb5CredentialsCacheManager.cpp',
+		'thrift/lib/cpp2/util/kerberos/Krb5CCacheStore.cpp',
+		'thrift/lib/cpp2/util/kerberos/Krb5Tgts.cpp',
+		'thrift/lib/cpp2/util/kerberos/FBKrb5GetCreds.cpp',
+	],
+	deps=[
+		'//thirdparty/folly:folly',
+		'//thirdparty/krb5:gssapi_krb5',
+	],
+	warning='no'
+)
+
+cc_library(
+	name='thriftcpp2',
+	srcs=[
+		'thrift/lib/cpp2/FrozenTApplicationException.cpp',
+		'thrift/lib/cpp2/GeneratedCodeHelper.cpp',
+		'thrift/lib/cpp2/async/AsyncClient.cpp',
+		'thrift/lib/cpp2/async/AsyncProcessor.cpp',
+		'thrift/lib/cpp2/async/Cpp2Channel.cpp',
+		'thrift/lib/cpp2/async/DuplexChannel.cpp',
+		'thrift/lib/cpp2/async/FramingHandler.cpp',
+		'thrift/lib/cpp2/async/HeaderChannel.cpp',
+		'thrift/lib/cpp2/async/HeaderChannelTrait.cpp',
+		'thrift/lib/cpp2/async/HeaderClientChannel.cpp',
+		'thrift/lib/cpp2/async/RSocketClientChannel.cpp',
+		'thrift/lib/cpp2/async/HeaderServerChannel.cpp',
+		'thrift/lib/cpp2/async/PcapLoggingHandler.cpp',
+		'thrift/lib/cpp2/async/ProtectionHandler.cpp',
+		'thrift/lib/cpp2/async/RequestChannel.cpp',
+		'thrift/lib/cpp2/async/ResponseChannel.cpp',
+		'thrift/lib/cpp2/async/SaslEndpoint.cpp',
+		'thrift/lib/cpp2/async/SaslNegotiationHandler.cpp',
+		'thrift/lib/cpp2/async/GssSaslClient.cpp',
+		'thrift/lib/cpp2/async/GssSaslServer.cpp',
+		'thrift/lib/cpp2/security/KerberosSASLHandshakeClient.cpp',
+		'thrift/lib/cpp2/security/KerberosSASLHandshakeServer.cpp',
+		'thrift/lib/cpp2/security/KerberosSASLHandshakeUtils.cpp',
+		'thrift/lib/cpp2/security/KerberosSASLThreadManager.cpp',
+		'thrift/lib/cpp2/security/SecurityKillSwitch.cpp',
+		'thrift/lib/cpp2/security/SecurityKillSwitchPoller.cpp',
+		'thrift/lib/cpp2/server/BaseThriftServer.cpp',
+		'thrift/lib/cpp2/server/Cpp2Connection.cpp',
+		'thrift/lib/cpp2/server/Cpp2Worker.cpp',
+		'thrift/lib/cpp2/server/ThriftServer.cpp',
+		'thrift/lib/cpp2/server/peeking/TLSHelper.cpp',
+		'thrift/lib/cpp2/transport/core/ThriftProcessor.cpp',
+		'thrift/lib/cpp2/transport/core/ThriftClientCallback.cpp',
+		'thrift/lib/cpp2/transport/core/ThriftClient.cpp',
+		'thrift/lib/cpp2/transport/http2/client/ThriftTransactionHandler.cpp',
+		'thrift/lib/cpp2/transport/http2/client/H2ClientConnection.cpp',
+		'thrift/lib/cpp2/transport/http2/common/H2Channel.cpp',
+		'thrift/lib/cpp2/transport/http2/common/H2ChannelFactory.cpp',
+		'thrift/lib/cpp2/transport/http2/common/HTTP2RoutingHandler.cpp',
+		'thrift/lib/cpp2/transport/http2/common/MultiRpcChannel.cpp',
+		'thrift/lib/cpp2/transport/http2/common/SingleRpcChannel.cpp',
+		'thrift/lib/cpp2/transport/http2/server/ThriftRequestHandler.cpp',
+		'thrift/lib/cpp2/transport/rsocket/server/ManagedRSocketConnection.cpp',
+		'thrift/lib/cpp2/transport/rsocket/server/RSResponder.cpp',
+		'thrift/lib/cpp2/transport/rsocket/server/RSRoutingHandler.cpp',
+		'thrift/lib/cpp2/transport/rsocket/server/RSThriftRequests.cpp',
+		'thrift/lib/cpp2/transport/inmemory/InMemoryChannel.cpp',
+		'thrift/lib/cpp2/transport/inmemory/InMemoryConnection.cpp',
+		'thrift/lib/cpp2/util/ScopedServerInterfaceThread.cpp',
+		'thrift/lib/cpp2/util/ScopedServerThread.cpp',
+		'thrift/perf/cpp2/util/Util.cpp',
+	],
+	deps=[
+		':security',
+		':thrift',
+		':thriftfrozen2',
+		':thriftprotocol',
+		'//thirdparty/fbthrift/thrift/lib/thrift:RpcMetadata',
+		'//thirdparty/fbthrift/thrift/lib/cpp2:Sasl',
+		'//thirdparty/fbthrift/thrift/lib/cpp2/transport/rsocket:Config',
+		'//thirdparty/rsocket-cpp:rsocket',
+	],
+	warning='no'
+)

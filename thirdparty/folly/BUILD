@@ -1,0 +1,2896 @@
+cc_library(
+  name="folly_base",
+  srcs=[
+    'folly/ClockGettimeWrappers.cpp',
+    'folly/Conv.cpp',
+    'folly/Demangle.cpp',
+    'folly/ExceptionWrapper.cpp',
+    'folly/Executor.cpp',
+    'folly/File.cpp',
+    'folly/FileUtil.cpp',
+    'folly/Format.cpp',
+    'folly/FormatArg.cpp',
+    'folly/GroupVarint.cpp',
+    'folly/IPAddress.cpp',
+    'folly/IPAddressV4.cpp',
+    'folly/IPAddressV6.cpp',
+    'folly/MacAddress.cpp',
+    'folly/MicroLock.cpp',
+    'folly/Poly.cpp',
+    'folly/Random.cpp',
+    'folly/ScopeGuard.cpp',
+    'folly/SharedMutex.cpp',
+    'folly/Singleton.cpp',
+    'folly/SocketAddress.cpp',
+    'folly/String.cpp',
+    'folly/Subprocess.cpp',
+    'folly/TimeoutQueue.cpp',
+    'folly/Unicode.cpp',
+    'folly/Uri.cpp',
+    'folly/dynamic.cpp',
+    'folly/json.cpp',
+    'folly/json_pointer.cpp',
+    'folly/compression/Compression.cpp',
+    'folly/compression/Counters.cpp',
+    'folly/compression/Zlib.cpp',
+    'folly/compression/Zstd.cpp',
+    'folly/concurrency/CacheLocality.cpp',
+    'folly/container/detail/F14Table.cpp',
+    'folly/detail/AtFork.cpp',
+    'folly/detail/Futex.cpp',
+    'folly/detail/IPAddress.cpp',
+    'folly/detail/MemoryIdler.cpp',
+    'folly/detail/RangeCommon.cpp',
+    'folly/detail/RangeSse42.cpp',
+    'folly/detail/SocketFastOpen.cpp',
+    'folly/detail/Sse.cpp',
+    'folly/detail/StaticSingletonManager.cpp',
+    'folly/detail/ThreadLocalDetail.cpp',
+    'folly/executors/CPUThreadPoolExecutor.cpp',
+    'folly/executors/Codel.cpp',
+    'folly/executors/GlobalExecutor.cpp',
+    'folly/executors/GlobalThreadPoolList.cpp',
+    'folly/executors/IOThreadPoolExecutor.cpp',
+    'folly/executors/InlineExecutor.cpp',
+    'folly/executors/ManualExecutor.cpp',
+    'folly/executors/QueuedImmediateExecutor.cpp',
+    'folly/executors/SerialExecutor.cpp',
+    'folly/executors/ThreadPoolExecutor.cpp',
+    'folly/executors/ThreadedExecutor.cpp',
+    'folly/executors/TimedDrivableExecutor.cpp',
+    'folly/experimental/DynamicParser.cpp',
+    'folly/experimental/EnvUtil.cpp',
+    'folly/experimental/FunctionScheduler.cpp',
+    'folly/experimental/JSONSchema.cpp',
+    'folly/experimental/JemallocNodumpAllocator.cpp',
+    'folly/experimental/NestedCommandLineApp.cpp',
+    'folly/experimental/ProgramOptions.cpp',
+    'folly/experimental/RCUUtils.cpp',
+    'folly/experimental/Select64.cpp',
+    'folly/experimental/TestUtil.cpp',
+    'folly/experimental/ThreadedRepeatingFunctionRunner.cpp',
+    'folly/experimental/bser/Dump.cpp',
+    'folly/experimental/bser/Load.cpp',
+    'folly/experimental/hazptr/hazptr.cpp',
+    'folly/experimental/hazptr/memory_resource.cpp',
+    'folly/experimental/io/AsyncIO.cpp',
+    'folly/experimental/io/FsUtil.cpp',
+    'folly/experimental/io/HugePages.cpp',
+    'folly/experimental/observer/detail/Core.cpp',
+    'folly/experimental/observer/detail/ObserverManager.cpp',
+    'folly/experimental/settings/Settings.cpp',
+    'folly/experimental/symbolizer/Dwarf.cpp',
+    'folly/experimental/symbolizer/Elf.cpp',
+    'folly/experimental/symbolizer/ElfCache.cpp',
+    'folly/experimental/symbolizer/LineReader.cpp',
+    'folly/experimental/symbolizer/SignalHandler.cpp',
+    'folly/experimental/symbolizer/StackTrace.cpp',
+    'folly/experimental/symbolizer/Symbolizer.cpp',
+    'folly/fibers/Baton.cpp',
+    'folly/fibers/Fiber.cpp',
+    'folly/fibers/FiberManager.cpp',
+    'folly/fibers/FiberManagerMap.cpp',
+    'folly/fibers/GuardPageAllocator.cpp',
+    'folly/fibers/Semaphore.cpp',
+    'folly/fibers/TimeoutController.cpp',
+    'folly/fibers/detail/AtomicBatchDispatcher.cpp',
+    'folly/futures/Barrier.cpp',
+    'folly/futures/Future.cpp',
+    'folly/futures/ThreadWheelTimekeeper.cpp',
+    'folly/hash/Checksum.cpp',
+    'folly/hash/SpookyHashV1.cpp',
+    'folly/hash/SpookyHashV2.cpp',
+    'folly/hash/detail/ChecksumDetail.cpp',
+    'folly/hash/detail/Crc32cDetail.cpp',
+    'folly/init/Init.cpp',
+    'folly/io/Cursor.cpp',
+    'folly/io/GlobalShutdownSocketSet.cpp',
+    'folly/io/IOBuf.cpp',
+    'folly/io/IOBufQueue.cpp',
+    'folly/io/RecordIO.cpp',
+    'folly/io/ShutdownSocketSet.cpp',
+    'folly/io/async/AsyncPipe.cpp',
+    'folly/io/async/AsyncSSLSocket.cpp',
+    'folly/io/async/AsyncServerSocket.cpp',
+    'folly/io/async/AsyncSignalHandler.cpp',
+    'folly/io/async/AsyncSocket.cpp',
+    'folly/io/async/AsyncSocketException.cpp',
+    'folly/io/async/AsyncTimeout.cpp',
+    'folly/io/async/AsyncUDPSocket.cpp',
+    'folly/io/async/EventBase.cpp',
+    'folly/io/async/EventBaseLocal.cpp',
+    'folly/io/async/EventBaseManager.cpp',
+    'folly/io/async/EventBaseThread.cpp',
+    'folly/io/async/EventHandler.cpp',
+    'folly/io/async/HHWheelTimer.cpp',
+    'folly/io/async/Request.cpp',
+    'folly/io/async/SSLContext.cpp',
+    'folly/io/async/SSLOptions.cpp',
+    'folly/io/async/ScopedEventBaseThread.cpp',
+    'folly/io/async/TimeoutManager.cpp',
+    'folly/io/async/VirtualEventBase.cpp',
+    'folly/io/async/ssl/OpenSSLUtils.cpp',
+    'folly/io/async/ssl/SSLErrors.cpp',
+    'folly/lang/Assume.cpp',
+    'folly/lang/ColdClass.cpp',
+    'folly/lang/SafeAssert.cpp',
+    'folly/logging/AsyncFileWriter.cpp',
+    'folly/logging/FileHandlerFactory.cpp',
+    'folly/logging/FileWriterFactory.cpp',
+    'folly/logging/GlogStyleFormatter.cpp',
+    'folly/logging/ImmediateFileWriter.cpp',
+    'folly/logging/Init.cpp',
+    'folly/logging/InitWeak.cpp',
+    'folly/logging/LogCategory.cpp',
+    'folly/logging/LogCategoryConfig.cpp',
+    'folly/logging/LogConfig.cpp',
+    'folly/logging/LogConfigParser.cpp',
+    'folly/logging/LogHandlerConfig.cpp',
+    'folly/logging/LogLevel.cpp',
+    'folly/logging/LogMessage.cpp',
+    'folly/logging/LogName.cpp',
+    'folly/logging/LogStream.cpp',
+    'folly/logging/LogStreamProcessor.cpp',
+    'folly/logging/Logger.cpp',
+    'folly/logging/LoggerDB.cpp',
+    'folly/logging/RateLimiter.cpp',
+    'folly/logging/StandardLogHandler.cpp',
+    'folly/logging/StandardLogHandlerFactory.cpp',
+    'folly/logging/StreamHandlerFactory.cpp',
+    'folly/logging/printf.cpp',
+    'folly/logging/xlog.cpp',
+    'folly/memory/MallctlHelper.cpp',
+    'folly/memory/ThreadCachedArena.cpp',
+    'folly/memory/detail/MallocImpl.cpp',
+    'folly/portability/Builtins.cpp',
+    'folly/portability/Dirent.cpp',
+    'folly/portability/Fcntl.cpp',
+    'folly/portability/Libgen.cpp',
+    'folly/portability/Malloc.cpp',
+    'folly/portability/OpenSSL.cpp',
+    'folly/portability/PThread.cpp',
+    'folly/portability/Sockets.cpp',
+    'folly/portability/Stdio.cpp',
+    'folly/portability/Stdlib.cpp',
+    'folly/portability/String.cpp',
+    'folly/portability/SysFile.cpp',
+    'folly/portability/SysMembarrier.cpp',
+    'folly/portability/SysMman.cpp',
+    'folly/portability/SysResource.cpp',
+    'folly/portability/SysStat.cpp',
+    'folly/portability/SysTime.cpp',
+    'folly/portability/SysUio.cpp',
+    'folly/portability/Time.cpp',
+    'folly/portability/Unistd.cpp',
+    'folly/ssl/Init.cpp',
+    'folly/ssl/OpenSSLCertUtils.cpp',
+    'folly/ssl/OpenSSLHash.cpp',
+    'folly/ssl/detail/OpenSSLThreading.cpp',
+    'folly/ssl/detail/SSLSessionImpl.cpp',
+    'folly/stats/BucketedTimeSeries.cpp',
+    'folly/stats/Histogram.cpp',
+    'folly/stats/MultiLevelTimeSeries.cpp',
+    'folly/stats/QuantileEstimator.cpp',
+    'folly/stats/TDigest.cpp',
+    'folly/stats/TimeseriesHistogram.cpp',
+    'folly/synchronization/AsymmetricMemoryBarrier.cpp',
+    'folly/synchronization/Hazptr.cpp',
+    'folly/synchronization/LifoSem.cpp',
+    'folly/synchronization/ParkingLot.cpp',
+    'folly/synchronization/Rcu.cpp',
+    'folly/synchronization/WaitOptions.cpp',
+    'folly/system/MemoryMapping.cpp',
+    'folly/system/Shell.cpp',
+    'folly/system/ThreadName.cpp',
+    'folly/io/async/test/ScopedBoundPort.cpp',
+    'folly/io/async/test/SocketPair.cpp',
+    'folly/io/async/test/TimeUtil.cpp',
+  ],
+  warning='no',
+  deps=[
+    '#pthread',
+    '//thirdparty/boost:boost_context',
+    '//thirdparty/boost:boost_chrono',
+    '//thirdparty/boost:boost_date_time',
+    '//thirdparty/boost:boost_filesystem',
+    '//thirdparty/boost:boost_program_options',
+    '//thirdparty/boost:boost_regex',
+    '//thirdparty/boost:boost_system',
+    '//thirdparty/boost:boost_thread',
+    '//thirdparty/double-conversion:double-conversion',
+    '//thirdparty/zstd:zstd',
+    '//thirdparty/zlib:z',
+    '//thirdparty/lz4:lz4',
+    '//thirdparty/bzip2:bz2',
+    '//thirdparty/snappy:snappy',
+    '//thirdparty/glog:glog',
+    '//thirdparty/gflags:gflags',
+    '//thirdparty/libevent:event',
+    '//thirdparty/openssl:ssl',
+  ],
+)
+
+cc_binary(
+  name="generate_fingerprint_tables",
+  srcs=[
+    'folly/build/GenerateFingerprintTables.cpp'
+  ],
+  deps=[
+    ':folly_base',
+    '#dl'
+  ],
+) 
+
+gen_rule(
+  name="fingerprint_tables_cpp",
+  cmd='sh ./thirdparty/build/folly_fingerprint_tables_cpp.sh $FIRST_OUT `pwd`',
+  outs='folly/build/FingerprintTables.cpp',
+  deps=[
+    ':generate_fingerprint_tables',
+  ]
+)
+
+cc_library(
+  name="folly_fingerprint",
+  srcs=[
+    'folly/build/FingerprintTables.cpp'
+  ],
+  deps=[
+    ':folly_base',
+    ':fingerprint_tables_cpp'
+  ],
+)
+
+gen_rule(
+  name="folly_deps",
+  cmd='touch $FIRST_OUT',
+  outs='folly/build/folly_deps.cpp',
+)
+
+cc_library(
+  name="folly",
+  srcs='folly/build/folly_deps.cpp',
+  deps=[
+    ':folly_deps',
+    ':folly_base',
+    ':folly_fingerprint',
+  ]
+)
+
+cc_library(
+  name="follybenchmark",
+  srcs=[
+    'folly/Benchmark.cpp',
+  ],
+  deps=[
+    ':folly'
+  ],
+)
+
+cc_library(
+  name="folly_test_support",
+  srcs=[
+    'folly/test/common/TestMain.cpp',
+    'folly/test/DeterministicSchedule.cpp',
+    'folly/test/SingletonTestStructs.cpp',
+    'folly/test/SocketAddressTestHelper.cpp',
+    'folly/logging/test/ConfigHelpers.cpp',
+    'folly/logging/test/TestLogHandler.cpp',
+    'folly/futures/test/TestExecutor.cpp',
+    'folly/io/async/test/TestSSLServer.cpp',
+  ],
+  deps=[
+    ':folly',
+    ':follybenchmark',
+    '//thirdparty/libevent:event'
+  ],
+  warning='no'
+)
+
+cc_test(
+  name="test_conv",
+  srcs=[
+    'folly/chrono/test/ConvTest.cpp',
+    'folly/test/ConvTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+  ]
+)
+cc_test(
+  name="test_compression",
+  srcs=[
+    'folly/compression/test/CompressionTest.cpp',
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+  ]
+) 
+cc_test(
+  name="f14_pre_test",
+  srcs=[
+    'folly/container/test/F14PreTest.cpp',
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+  ]
+)
+cc_test(
+  name="f14_map_test",
+  srcs=[
+    'folly/container/test/F14MapTest.cpp',
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+  ]
+)
+cc_test(
+  name="test_container",
+  srcs=[
+    'folly/container/test/AccessTest.cpp',
+    'folly/container/test/ArrayTest.cpp',
+    'folly/container/test/BitIteratorTest.cpp',
+    'folly/container/test/EvictingCacheMapTest.cpp',
+    'folly/container/test/F14SetTest.cpp',
+    'folly/container/test/ForeachTest.cpp',
+    'folly/container/test/MergeTest.cpp',
+    'folly/container/test/SparseByteSetTest.cpp',
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+  ]
+)
+cc_test(
+  name="test_concurrency",
+  srcs=[
+    'folly/concurrency/test/CacheLocalityTest.cpp',
+    'folly/concurrency/test/CoreCachedSharedPtrTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':follybenchmark',
+  ]
+)
+
+# executors/test/
+
+cc_test(
+  name="async_helpers_test",
+  srcs=[
+    'folly/executors/test/AsyncTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    '//thirdparty/libevent:event_core',
+    ':folly_test_support',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name="codel_test",
+  srcs=[
+    'folly/executors/test/CodelTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    '//thirdparty/libevent:event_core',
+    '#unwind'
+  ]
+)
+cc_test(
+  name="executor_test",
+  srcs=[
+    'folly/executors/test/ExecutorTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    '//thirdparty/libevent:event_core',
+    '#unwind'
+  ]
+)
+cc_test(
+  name="fiber_io_executor_test",
+  srcs=[
+    'folly/executors/test/FiberIOExecutorTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    '//thirdparty/libevent:event_core',
+    '#unwind'
+  ]
+)
+cc_test(
+  name="global_executor_test",
+  srcs=[
+    'folly/executors/test/GlobalExecutorTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    '//thirdparty/libevent:event_core',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)  
+cc_test(
+  name="serial_executor_test",
+  srcs=[
+     'folly/executors/test/SerialExecutorTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    '//thirdparty/libevent:event_core',
+    ':folly_test_support',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name="thread_pool_executor_test",
+  srcs=[
+    'folly/executors/test/ThreadPoolExecutorTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    '//thirdparty/libevent:event_core',
+    ':folly_test_support',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name="threaded_executor_test",
+  srcs=[
+    'folly/executors/test/ThreadedExecutorTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    '//thirdparty/libevent:event_core',
+    '#unwind'
+  ]
+)
+cc_test(
+  name="timed_drivable_executor_test",
+  srcs=[
+    'folly/executors/test/TimedDrivableExecutorTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    '//thirdparty/libevent:event_core',
+    '#unwind'
+  ]
+)
+
+cc_test(
+  name='autotimer_test',
+  srcs=[
+    'folly/experimental/test/AutoTimerTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly'
+  ]
+)
+cc_test(
+  name='bits_test_2',
+  srcs=[
+    'folly/experimental/test/BitsTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support', 
+    '//thirdparty/gflags:gflags',
+    '#unwind'
+  ]
+)  
+cc_test(
+  name='bitvector_test',
+  srcs=[
+    'folly/experimental/test/BitVectorCodingTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    '//thirdparty/gflags:gflags',
+    '//thirdparty/libevent:event',
+    ':follybenchmark',
+    '#unwind'
+  ]
+)
+cc_test(
+ name='dynamic_parser_test',
+ srcs=[
+   'folly/experimental/test/DynamicParserTest.cpp'
+ ],
+ warning='no',
+ deps=[
+   ':folly',
+ ]
+)
+
+cc_test(
+  name='eliasfano_test',
+  srcs=[
+    'folly/experimental/test/EliasFanoCodingTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    '//thirdparty/gflags:gflags',
+    '//thirdparty/libevent:event',
+    ':follybenchmark',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name='event_count_test',
+  srcs=[
+    'folly/experimental/test/EventCountTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly'
+  ]
+) 
+cc_test(
+  name='function_scheduler_test',
+  srcs=[
+    'folly/experimental/test/FunctionSchedulerTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly'
+  ]
+) 
+cc_test(
+  name='future_dag_test',
+  srcs=[
+    'folly/experimental/test/FutureDAGTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='json_schema_test',
+  srcs=[
+    'folly/experimental/test/JSONSchemaTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)  
+cc_test(
+  name='lock_free_ring_buffer_test',
+  srcs=[
+    'folly/experimental/test/LockFreeRingBufferTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support', 
+    '#unwind'
+  ]
+)  
+cc_test(
+  name='stringkeyed_test',
+  srcs=[
+    'folly/experimental/test/StringKeyedTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly'
+  ]
+) 
+cc_test(
+  name='test_util_test',
+  srcs=[
+    'folly/experimental/test/TestUtilTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly'
+  ]
+) 
+cc_test(
+  name='tuple_ops_test',
+  srcs=[
+    'folly/experimental/test/TupleOpsTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly'
+  ]
+) 
+cc_test(
+  name='fs_util_test',
+  srcs=[
+    'folly/experimental/io/test/FsUtilTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly'
+  ]
+)
+# logging/test/
+cc_test(
+  name='async_file_writer_test',
+  srcs=[
+    'folly/logging/test/AsyncFileWriterTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name='config_parser_test',
+  srcs=[
+    'folly/logging/test/ConfigParserTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support', 
+    '#unwind'
+  ]
+)   
+cc_test(
+  name='config_update_test',
+  srcs=[
+    'folly/logging/test/ConfigUpdateTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)  
+cc_test(
+  name='file_handler_factory_test',
+  srcs=[
+    'folly/logging/test/FileHandlerFactoryTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='glog_formatter_test',
+  srcs=[
+    'folly/logging/test/GlogFormatterTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name='immediate_file_writer_test',
+  srcs=[
+    'folly/logging/test/ImmediateFileWriterTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name='log_category_test',
+  srcs=[
+    'folly/logging/test/LogCategoryTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name='logger_db_test',
+  srcs=[
+    'folly/logging/test/LoggerDBTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name='logger_test',
+  srcs=[
+    'folly/logging/test/LoggerTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name='log_level_test',
+  srcs=[
+    'folly/logging/test/LogLevelTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name='log_message_test',
+  srcs=[
+    'folly/logging/test/LogMessageTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name='log_name_test',
+  srcs=[
+    'folly/logging/test/LogNameTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name='log_stream_test',
+  srcs=[
+    'folly/logging/test/LogStreamTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name='printf_test',
+  srcs=[
+    'folly/logging/test/PrintfTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='rate_limiter_test',
+  srcs=[
+    'folly/logging/test/RateLimiterTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='standard_log_handler_test',
+  srcs=[
+    'folly/logging/test/StandardLogHandlerTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+ name='xlog_test',
+ srcs=[
+   'folly/logging/test/XlogFile1.cpp',
+   'folly/logging/test/XlogFile2.cpp',
+   'folly/logging/test/XlogTest.cpp'
+ ],
+ warning='no',
+ deps=[
+   ':folly',
+   ':folly_test_support',
+   '//thirdparty/libevent:event_core',
+   '#unwind'
+ ]
+)    
+# fibers/test/ 
+cc_test(
+  name='fibers_test',
+  srcs=[
+    'folly/fibers/test/FibersTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':follybenchmark',
+    '#unwind'
+  ]
+)
+# functional/test/
+cc_test(
+  name='apply_tuple_test',
+  srcs=[
+    'folly/functional/test/ApplyTupleTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':follybenchmark',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='partial_test',
+  srcs=[
+    'folly/functional/test/PartialTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':follybenchmark',
+    '#unwind'
+  ]
+)
+# futures/test/
+cc_test(
+  name='barrier_test',
+  srcs=[
+    'folly/futures/test/BarrierTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':follybenchmark',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='callback_lifetime_test',
+  srcs=[
+    'folly/futures/test/CallbackLifetimeTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':follybenchmark',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='collect_test',
+  srcs=[
+    'folly/futures/test/CollectTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':follybenchmark',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='context_test',
+  srcs=[
+    'folly/futures/test/ContextTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':follybenchmark',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='core_test',
+  srcs=[
+    'folly/futures/test/CoreTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':follybenchmark',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='ensure_test',
+  srcs=[
+    'folly/futures/test/EnsureTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':follybenchmark',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='filter_test',
+  srcs=[
+    'folly/futures/test/FilterTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':follybenchmark',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='future_splitter_test',
+  srcs=[
+    'folly/futures/test/FutureSplitterTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':follybenchmark',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='header_compile_test',
+  srcs=[
+    'folly/futures/test/HeaderCompileTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='interrupt_test',
+  srcs=[
+    'folly/futures/test/InterruptTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='map_test',
+  srcs=[
+    'folly/futures/test/MapTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='non_copyable_lambda_test',
+  srcs=[
+    'folly/futures/test/NonCopyableLambdaTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='poll_test',
+  srcs=[
+    'folly/futures/test/PollTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='promise_test',
+  srcs=[
+    'folly/futures/test/PromiseTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='reduce_test',
+  srcs=[
+    'folly/futures/test/ReduceTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='self_destruct_test',
+  srcs=[
+    'folly/futures/test/SelfDestructTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='shared_promise_test',
+  srcs=[
+    'folly/futures/test/SharedPromiseTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='test_executor_test',
+  srcs=[
+    'folly/futures/test/TestExecutorTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='then_compile_test',
+  srcs=[
+    'folly/futures/test/ThenCompileTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='then_test',
+  srcs=[
+    'folly/futures/test/ThenTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='timekeeper_test',
+  srcs=[
+    'folly/futures/test/TimekeeperTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='times_test',
+  srcs=[
+    'folly/futures/test/TimesTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='unwrap_test',
+  srcs=[
+    'folly/futures/test/UnwrapTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='via_test',
+  srcs=[
+    'folly/futures/test/ViaTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='wait_test',
+  srcs=[
+    'folly/futures/test/WaitTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='when_test',
+  srcs=[
+    'folly/futures/test/WhenTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='while_do_test',
+  srcs=[
+    'folly/futures/test/WhileDoTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='will_equal_test',
+  srcs=[
+    'folly/futures/test/WillEqualTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='window_test',
+  srcs=[
+    'folly/futures/test/WindowTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+)
+
+# gen/test/
+cc_test(
+  name='combine_test',
+  srcs=[
+    'folly/gen/test/CombineTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '//thirdparty/gflags:gflags',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name='parallel_map_test',
+  srcs=[
+    'folly/gen/test/ParallelMapTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+) 
+cc_test(
+  name='parallel_test',
+  srcs=[
+    'folly/gen/test/ParallelTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':folly_test_support',
+    '#unwind'
+  ]
+) 
+
+# hash/test/
+cc_test(
+  name='checksum_test',
+  srcs=[
+    'folly/hash/test/ChecksumTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly',
+    ':follybenchmark',
+    '#unwind'
+  ]
+)
+cc_test(
+  name='hash_test',
+  srcs=[
+    'folly/hash/test/HashTest.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly'
+  ]
+)
+
+cc_test(
+  name='spooky_hash_v1_test',
+  srcs=[
+    'folly/hash/test/SpookyHashV1Test.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly'
+  ]     
+)
+cc_test(
+  name='spooky_hash_v2_test',
+  srcs=[
+    'folly/hash/test/SpookyHashV2Test.cpp'
+  ],
+  warning='no',
+  deps=[
+    ':folly'
+  ]
+)
+
+# io/test/
+cc_test(
+  name='iobuf_test',
+  srcs=[
+    'folly/io/test/IOBufTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly'
+  ]
+)
+cc_test(
+  name='iobuf_cursor_test',
+  srcs=[
+    'folly/io/test/IOBufCursorTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='iobuf_queue_test',
+  srcs=[
+    'folly/io/test/IOBufQueueTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='record_io_test',
+  srcs=[
+    'folly/io/test/RecordIOTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='ShutdownSocketSetTest',
+  srcs=[
+    'folly/io/test/ShutdownSocketSetTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   '#unwind'
+  ]
+)
+
+# io/async/test
+cc_test(
+  name='async_test',
+  srcs=[
+    'folly/io/async/test/AsyncPipeTest.cpp',
+    'folly/io/async/test/AsyncSocketExceptionTest.cpp',
+    'folly/io/async/test/AsyncSocketTest.cpp',
+    'folly/io/async/test/AsyncSocketTest2.cpp',
+    'folly/io/async/test/AsyncSSLSocketTest.cpp',
+    'folly/io/async/test/AsyncSSLSocketTest2.cpp',
+    'folly/io/async/test/AsyncSSLSocketWriteTest.cpp',
+    'folly/io/async/test/AsyncTransportTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)  
+cc_test(
+  name='async_timeout_test',
+  srcs=[
+    'folly/io/async/test/AsyncTimeoutTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='AsyncUDPSocketTest',
+  srcs=[
+    'folly/io/async/test/AsyncUDPSocketTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='DelayedDestructionTest',
+  srcs=[
+    'folly/io/async/test/DelayedDestructionTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='DelayedDestructionBaseTest',
+  srcs=[
+    'folly/io/async/test/DelayedDestructionBaseTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='DestructorCheckTest',
+  srcs=[
+    'folly/io/async/test/DestructorCheckTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='EventBaseTest',
+  srcs=[
+    'folly/io/async/test/EventBaseTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='EventBaseLocalTest',
+  srcs=[
+    'folly/io/async/test/EventBaseLocalTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='HHWheelTimerTest',
+  srcs=[
+    'folly/io/async/test/HHWheelTimerTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='HHWheelTimerSlowTests',
+  srcs=[
+    'folly/io/async/test/HHWheelTimerSlowTests.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='NotificationQueueTest',
+  srcs=[
+    'folly/io/async/test/NotificationQueueTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='RequestContextTest',
+  srcs=[
+    'folly/io/async/test/RequestContextTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='ScopedEventBaseThreadTest',
+  srcs=[
+    'folly/io/async/test/ScopedEventBaseThreadTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='ssl_session_test',
+  srcs=[
+    'folly/io/async/test/SSLSessionTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ],
+  testdata=[
+    ('folly/io/async/test/certs/tests-cert.pem','folly/io/async/test/certs/tests-cert.pem'),
+    ('folly/io/async/test/certs/tests-key.pem','folly/io/async/test/certs/tests-key.pem'),
+    ('folly/io/async/test/certs/client_key.pem','folly/io/async/test/certs/client_key.pem'),
+    ('folly/io/async/test/certs/client_cert.pem','folly/io/async/test/certs/client_cert.pem'),
+    ('folly/io/async/test/certs/client_ca_cert.pem','folly/io/async/test/certs/client_ca_cert.pem'),
+    ('folly/io/async/test/certs/ca-cert.pem','folly/io/async/test/certs/ca-cert.pem')
+  ]
+)  
+cc_test(
+  name='writechain_test',
+  srcs=[
+    'folly/io/async/test/WriteChainAsyncTransportWrapperTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+# io/async/ssl/test/
+cc_test(
+  name='ssl_errors_test',
+  srcs=[
+    'folly/io/async/ssl/test/SSLErrorsTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+# lang/test/
+cc_test(
+  name='bits_test',
+  srcs=[
+    'folly/lang/test/BitsTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='cold_class_test',
+  srcs=[
+    'folly/lang/test/ColdClassTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='safe_assert_test',
+  srcs=[
+    'folly/lang/test/SafeAssertTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+# memory/test/
+cc_test(
+  name='arena_test',
+  srcs=[
+    'folly/memory/test/ArenaTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='thread_cached_arena_test',
+  srcs=[
+    'folly/memory/test/ThreadCachedArenaTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='mallctl_helper_test',
+  srcs=[
+    'folly/memory/test/MallctlHelperTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+# portability/test/
+cc_test(
+  name='constexpr_test',
+  srcs=[
+    'folly/portability/test/ConstexprTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='libgen-test',
+  srcs=[
+    'folly/portability/test/LibgenTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='openssl_portability_test',
+  srcs=[
+    'folly/portability/test/OpenSSLPortabilityTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='time-test',
+  srcs=[
+    'folly/portability/test/TimeTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+# ssl/test/
+cc_test(
+  name='openssl_hash_test',
+  srcs=[
+    'folly/ssl/test/OpenSSLHashTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+
+# stats/test/
+cc_test(
+  name='buffered_stat_test',
+  srcs=[
+    'folly/stats/test/BufferedStatTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='digest_builder_test',
+  srcs=[
+    'folly/stats/test/DigestBuilderTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='histogram_test',
+  srcs=[
+    'folly/stats/test/HistogramTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='quantile_estimator_test',
+  srcs=[
+    'folly/stats/test/QuantileEstimatorTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='sliding_window_test',
+  srcs=[
+    'folly/stats/test/SlidingWindowTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='tdigest_test',
+  srcs=[
+    'folly/stats/test/TDigestTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+cc_test(
+ name='timeseries_histogram_test',
+ srcs=[
+   'folly/stats/test/TimeseriesHistogramTest.cpp'
+ ],
+ warning='no',
+ deps=[
+  ':folly',
+  ':folly_test_support',
+  '//thirdparty/libevent:event_core',
+  '#unwind'
+ ]
+)
+  
+cc_test(
+  name='timeseries_test',
+  srcs=[
+    'folly/stats/test/TimeSeriesTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+
+# synchronization/test/
+cc_test(
+  name='baton_test',
+  srcs=[
+    'folly/synchronization/test/BatonTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='call_once_test',
+  srcs=[
+    'folly/synchronization/test/CallOnceTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='lifo_sem_test',
+  srcs=[
+    'folly/synchronization/test/LifoSemTests.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='rw_spin_lock_test',
+  srcs=[
+    'folly/synchronization/test/RWSpinLockTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+
+# system/test/
+cc_test(
+  name='memory_mapping_test',
+  srcs=[
+    'folly/system/test/MemoryMappingTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='shell_test',
+  srcs=[
+    'folly/system/test/ShellTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='thread_id_test',
+  srcs=[
+    'folly/system/test/ThreadIdTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='thread_name_test',
+  srcs=[
+    'folly/system/test/ThreadNameTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+# synchronization/test/
+cc_test(
+  name='atomic_struct_test',
+  srcs=[
+    'folly/synchronization/test/AtomicStructTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='small_locks_test',
+  srcs=[
+    'folly/synchronization/test/SmallLocksTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+# test/
+# line 654 to line 666
+cc_test(
+  name='ahm_int_stress_test',
+  srcs=[
+    'folly/test/AHMIntStressTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='arena_smartptr_test',
+  srcs=[
+    'folly/test/ArenaSmartPtrTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='ascii_check_test',
+  srcs=[
+    'folly/test/AsciiCaseInsensitiveTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='atomic_bit_set_test',
+  srcs=[
+    'folly/test/AtomicBitSetTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='atomic_hash_array_test',
+  srcs=[
+    'folly/test/AtomicHashArrayTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='atomic_hash_map_test',
+  srcs=[
+    'folly/test/AtomicHashMapTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='atomic_linked_list_test',
+  srcs=[
+    'folly/test/AtomicLinkedListTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='atomic_unordered_map_test',
+  srcs=[
+    'folly/test/AtomicUnorderedMapTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='cacheline_padded_test',
+  srcs=[
+    'folly/test/CachelinePaddedTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='clock_gettime_wrappers_test',
+  srcs=[
+    'folly/test/ClockGettimeWrappersTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='concurrent_skip_list_test',
+  srcs=[
+    'folly/test/ConcurrentSkipListTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='conv_test',
+  srcs=[
+    'folly/test/ConvTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+# line 666 to line 680
+cc_test(
+  name='cpu_id_test',
+  srcs=[
+    'folly/test/CpuIdTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='demangle_test',
+  srcs=[
+    'folly/test/DemangleTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='deterministic_schedule_test',
+  srcs=[
+    'folly/test/DeterministicScheduleTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='discriminated_ptr_test',
+  srcs=[
+    'folly/test/DiscriminatedPtrTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='dynamic_test',
+  srcs=[
+    'folly/test/DynamicTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='dynamic_converter_test',
+  srcs=[
+    'folly/test/DynamicConverterTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='dynamic_other_test',
+  srcs=[
+    'folly/test/DynamicOtherTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='endian_test',
+  srcs=[
+    'folly/test/EndianTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='exception_test',
+  srcs=[
+    'folly/test/ExceptionTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='exception_wrapper_test',
+  srcs=[
+    'folly/test/ExceptionWrapperTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='expected_test',
+  srcs=[
+    'folly/test/ExpectedTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='fbvector_test',
+  srcs=[
+    'folly/test/FBVectorTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='file_test',
+  srcs=[
+    'folly/test/FileTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+# line 680 to line 697
+cc_test(
+  name='file_util_test',
+  srcs=[
+    'folly/test/FileUtilTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='format_other_test',
+  srcs=[
+    'folly/test/FormatOtherTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='format_test',
+  srcs=[
+    'folly/test/FormatTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='function_test',
+  srcs=[
+    'folly/test/FunctionTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='function_ref_test',
+  srcs=[
+    'folly/test/FunctionRefTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='futex_test',
+  srcs=[
+    'folly/test/FutexTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ],
+  extra_linkflags=[
+    '-Wl,--allow-multiple-definition'
+  ],
+)
+cc_test(
+  name='glog_test',
+  srcs=[
+    'folly/test/GLogTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='group_varint_test',
+  srcs=[
+    'folly/test/GroupVarintTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='group_varint_test_ssse3',
+  srcs=[
+    'folly/test/GroupVarintTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='has_member_fn_traits_test',
+  srcs=[
+    'folly/test/HasMemberFnTraitsTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='iterators_test',
+  srcs=[
+    'folly/test/IteratorsTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='indestructible_test',
+  srcs=[
+    'folly/test/IndestructibleTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='indexed_mem_pool_test',
+  srcs=[
+    'folly/test/IndexedMemPoolTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+# line 697 to line 732
+cc_test(
+  name='json_pointer_test',
+  srcs=[
+    'folly/test/json_pointer_test.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='json_other_test',
+  srcs=[
+    'folly/test/JsonOtherTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ],
+  testdata=[
+    ('folly/test/json_test_data/commented.json', 'folly/test/json_test_data/commented.json'),
+    ('folly/test/json_test_data/commented.json.exp', 'folly/test/json_test_data/commented.json.exp') 
+  ]
+)  
+cc_test(
+  name='lazy_test',
+  srcs=[
+    'folly/test/LazyTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='lock_traits_test',
+  srcs=[
+    'folly/test/LockTraitsTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='locks_test',
+  srcs=[
+    'folly/test/SpinLockTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='math_test',
+  srcs=[
+    'folly/test/MathTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='map_util_test',
+  srcs=[
+    'folly/test/MapUtilTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='memcpy_test',
+  srcs=[
+    'folly/test/MemcpyTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='memory_idler_test',
+  srcs=[
+    'folly/test/MemoryIdlerTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='memory_test',
+  srcs=[
+    'folly/test/MemoryTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='move_wrapper_test',
+  srcs=[
+    'folly/test/MoveWrapperTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='mpmc_pipeline_test',
+  srcs=[
+    'folly/test/MPMCPipelineTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='mpmc_queue_test',
+  srcs=[
+    'folly/test/MPMCQueueTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='network_address_test',
+  srcs=[
+    'folly/test/IPAddressTest.cpp',
+    'folly/test/MacAddressTest.cpp',
+    'folly/test/SocketAddressTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='optional_test',
+  srcs=[
+    'folly/test/OptionalTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='packed_sync_ptr_test',
+  srcs=[
+    'folly/test/PackedSyncPtrTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='padded_test',
+  srcs=[
+    'folly/test/PaddedTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='portability_test',
+  srcs=[
+    'folly/test/PortabilityTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='producer_consumer_queue_test',
+  srcs=[
+    'folly/test/ProducerConsumerQueueTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='random_test',
+  srcs=[
+    'folly/test/RandomTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='range_test',
+  srcs=[
+    'folly/test/RangeTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='scope_guard_test',
+  srcs=[
+    'folly/test/ScopeGuardTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+# line 732 to line 751 (end)
+cc_test(
+  name='singleton_test_global',
+  srcs=[
+    'folly/test/SingletonTestGlobal.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='singleton_thread_local_test',
+  srcs=[
+    'folly/test/SingletonThreadLocalTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='small_vector_test',
+  srcs=[
+    'folly/test/small_vector_test.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='sorted_vector_types_test',
+  srcs=[
+    'folly/test/sorted_vector_test.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='string_test',
+  srcs=[
+    'folly/test/StringTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='synchronized_test',
+  srcs=[
+    'folly/test/SynchronizedTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='thread_cached_int_test',
+  srcs=[
+    'folly/test/ThreadCachedIntTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='thread_local_test',
+  srcs=[
+    'folly/test/ThreadLocalTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='timeout_queue_test',
+  srcs=[
+    'folly/test/TimeoutQueueTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='token_bucket_test',
+  srcs=[
+    'folly/test/TokenBucketTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='traits_test',
+  srcs=[
+    'folly/test/TraitsTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='try_test',
+  srcs=[
+    'folly/test/TryTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='unit_test',
+  srcs=[
+    'folly/test/UnitTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='uri_test',
+  srcs=[
+    'folly/test/UriTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+cc_test(
+  name='varint_test',
+  srcs=[
+    'folly/test/VarintTest.cpp'
+  ],
+  warning='no',
+  deps=[
+   ':folly',
+   ':folly_test_support',
+   '#unwind'
+  ]
+)
+
+# ---------end----------- #

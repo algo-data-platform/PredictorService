@@ -1,0 +1,63 @@
+cc_binary(
+	name='example_server',
+	srcs=[
+		'cpp2/server/EchoService.cpp',
+		'cpp2/server/ChatRoomService.cpp',
+		'cpp2/server/ExampleServer.cpp',
+	],
+	incs=[
+		'./cpp2'
+	],
+	deps=[
+		'//thirdparty/fbthrift/thrift/example/if:chatroom',
+		'//thirdparty/fbthrift:thriftcpp2',
+		'//thirdparty/proxygen:proxygenhttpserver',
+		'#unwind',
+		'#dl',
+		'#keyutils',
+		'#resolv',
+	],
+	warning='no'
+)
+
+cc_binary(
+	name='chatroom_client',
+	srcs=[
+		'cpp2/client/ChatRoomClient.cpp',
+		'cpp2/server/ChatRoomService.cpp'
+	],
+	incs=[
+		'./cpp2'
+	],
+	deps=[
+		'//thirdparty/fbthrift/thrift/example/if:chatroom',
+		'//thirdparty/fbthrift:thriftcpp2',
+		'//thirdparty/proxygen:proxygenhttpserver',
+		'#unwind',
+		'#dl',
+		'#keyutils',
+		'#resolv',
+	],
+	warning='no'
+)
+
+cc_binary(
+	name='echo_client',
+	srcs=[
+		'cpp2/client/EchoClient.cpp',
+		'cpp2/server/EchoService.cpp',
+	],
+	incs=[
+		'./cpp2'
+	],
+	deps=[
+		'//thirdparty/fbthrift/thrift/example/if:chatroom',
+		'//thirdparty/fbthrift:thriftcpp2',
+		'//thirdparty/proxygen:proxygenhttpserver',
+		'#unwind',
+		'#dl',
+		'#keyutils',
+		'#resolv',
+	],
+	warning='no'
+)

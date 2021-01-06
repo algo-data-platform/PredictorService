@@ -1,0 +1,214 @@
+{
+  "parameter_extractor_config": {
+    "p25": {
+      "extractor": "id", 
+      "group": 25, 
+      "feature_names": [
+        "id25"
+      ]
+    }, 
+    "p24": {
+      "extractor": "id", 
+      "group": 24, 
+      "feature_names": [
+        "id24"
+      ]
+    }, 
+    "p27": {
+      "extractor": "id", 
+      "group": 27, 
+      "feature_names": [
+        "id27"
+      ]
+    }, 
+    "p26": {
+      "extractor": "id", 
+      "group": 26, 
+      "feature_names": [
+        "id26"
+      ]
+    }, 
+    "p21": {
+      "extractor": "id", 
+      "group": 21, 
+      "feature_names": [
+        "id21"
+      ]
+    }, 
+    "p20": {
+      "extractor": "id", 
+      "group": 20, 
+      "feature_names": [
+        "id20"
+      ]
+    }, 
+    "p23": {
+      "extractor": "id", 
+      "group": 23, 
+      "feature_names": [
+        "id23"
+      ]
+    }, 
+    "p22": {
+      "extractor": "id", 
+      "group": 22, 
+      "feature_names": [
+        "id22"
+      ]
+    }, 
+    "p29": {
+      "extractor": "id", 
+      "group": 29, 
+      "feature_names": [
+        "id29"
+      ]
+    }, 
+    "p28": {
+      "extractor": "id", 
+      "group": 28, 
+      "feature_names": [
+        "id28"
+      ]
+    }, 
+    "p10": {
+      "extractor": "id", 
+      "group": 10, 
+      "feature_names": [
+        "id10"
+      ]
+    }, 
+    "p11": {
+      "extractor": "id", 
+      "group": 11, 
+      "feature_names": [
+        "id11"
+      ]
+    }, 
+    "p12": {
+      "extractor": "id", 
+      "group": 12, 
+      "feature_names": [
+        "id12"
+      ]
+    }, 
+    "p13": {
+      "extractor": "id", 
+      "group": 13, 
+      "feature_names": [
+        "id13"
+      ]
+    }, 
+    "p14": {
+      "extractor": "id", 
+      "group": 14, 
+      "feature_names": [
+        "id14"
+      ]
+    }, 
+    "p15": {
+      "extractor": "id", 
+      "group": 15, 
+      "feature_names": [
+        "id15"
+      ]
+    }, 
+    "p16": {
+      "extractor": "id", 
+      "group": 16, 
+      "feature_names": [
+        "id16"
+      ]
+    }, 
+    "p17": {
+      "extractor": "id", 
+      "group": 17, 
+      "feature_names": [
+        "id17"
+      ]
+    }, 
+    "p18": {
+      "extractor": "id", 
+      "group": 18, 
+      "feature_names": [
+        "id18"
+      ]
+    }, 
+    "p19": {
+      "extractor": "id", 
+      "group": 19, 
+      "feature_names": [
+        "id19"
+      ]
+    }, 
+    "p30": {
+      "extractor": "id", 
+      "group": 30, 
+      "feature_names": [
+        "id30"
+      ]
+    }, 
+    "p2": {
+      "extractor": "id", 
+      "group": 2, 
+      "feature_names": [
+        "id2"
+      ]
+    }, 
+    "p3": {
+      "extractor": "id", 
+      "group": 3, 
+      "feature_names": [
+        "id3"
+      ]
+    }, 
+    "p1": {
+      "extractor": "id", 
+      "group": 1, 
+      "feature_names": [
+        "id1"
+      ]
+    }, 
+    "p6": {
+      "extractor": "id", 
+      "group": 6, 
+      "feature_names": [
+        "id6"
+      ]
+    }, 
+    "p7": {
+      "extractor": "id", 
+      "group": 7, 
+      "feature_names": [
+        "id7"
+      ]
+    }, 
+    "p4": {
+      "extractor": "id", 
+      "group": 4, 
+      "feature_names": [
+        "id4"
+      ]
+    }, 
+    "p5": {
+      "extractor": "id", 
+      "group": 5, 
+      "feature_names": [
+        "id5"
+      ]
+    }, 
+    "p8": {
+      "extractor": "id", 
+      "group": 8, 
+      "feature_names": [
+        "id8"
+      ]
+    }, 
+    "p9": {
+      "extractor": "id", 
+      "group": 9, 
+      "feature_names": [
+        "id9"
+      ]
+    }
+  }
+}

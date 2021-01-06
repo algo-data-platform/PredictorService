@@ -1,0 +1,12 @@
+fbthrift_library(
+    name="Sasl",
+    srcs=[
+        'Sasl.thrift'
+    ],
+    options='',
+    include_prefix='thrift/lib/cpp2',
+	deps=[
+		'//thirdparty/fbthrift/thrift/lib/thrift:RpcMetadata',
+		'//thirdparty/fbthrift:thrift1'
+	]
+)

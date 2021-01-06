@@ -1,0 +1,8 @@
+{
+  "framework": "catboost",
+  "version": "v0",
+  "model": "catboost",
+  "model_file": "catboost_direct_v0_demo_model.model",
+  "model_full_name": "catboost_direct_v0_demo_model",
+  "feature_framework": "direct"
+}

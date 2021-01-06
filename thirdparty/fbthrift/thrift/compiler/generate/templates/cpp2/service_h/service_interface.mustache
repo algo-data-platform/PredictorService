@@ -1,0 +1,89 @@
+<%!
+
+  Copyright 2016 Facebook, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>class <%service:name%>SvIf : public <%service:name%>SvAsyncIf, <%#service:extends%>virtual public <% > common/namespace_cpp2%><%service:name%>SvIf<%/service:extends%><%^service:extends%>public apache::thrift::ServerInterface<%/service:extends%> {
+ public:
+
+	// 主要用于服务注册，服务发现，服务调用自动关联
+  constexpr static char fullServiceName[] = "<%#program:namespace_cpp2%><%namespace:name%>.<%/program:namespace_cpp2%><%#service:namespace_cpp2%><%namespace:name%>.<%/service:namespace_cpp2%><%service:name%>";
+
+  typedef <%service:name%>AsyncProcessor ProcessorType;
+  std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
+<%#service:functions%><%#function:returnType%>
+<%#type:deprecated_stream?%>
+  <%#type:streamElemType%>
+    <%#type:resolves_to_complex_return?%>
+  virtual void async_<%#function:eb%>eb<%/function:eb%><%^function:eb%>tm<%/function:eb%>_<%function:name%>(std::unique_ptr<apache::thrift::StreamingHandlerCallback<<% > types/unique_ptr_type%>>> callback<%function:comma%><% > service_common/function_param_list%>) override;
+    <%/type:resolves_to_complex_return?%>
+    <%^type:resolves_to_complex_return?%>
+  virtual void async_<%#function:eb%>eb<%/function:eb%><%^function:eb%>tm<%/function:eb%>_<%function:name%>(std::unique_ptr<apache::thrift::StreamingHandlerCallback<<% > types/type%>>> callback<%function:comma%><% > service_common/function_param_list%>) override;
+    <%/type:resolves_to_complex_return?%>
+  <%/type:streamElemType%>
+<%/type:deprecated_stream?%>
+<%^type:deprecated_stream?%>
+<%^type:resolves_to_complex_return?%>
+  virtual <% > types/type%> <%function:name%>(<% > service_common/function_param_list_commented_out%>);
+  folly::Future<<% > types/service_type%>> future_<%function:name%>(<% > service_common/function_param_list%>) override;
+<%#function:oneway?%>
+  void async_<%#function:eb%>eb<%/function:eb%><%^function:eb%>tm<%/function:eb%>_<%function:name%>(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback<%function:comma%><% > service_common/function_param_list%>) override;
+<%/function:oneway?%>
+<%^function:oneway?%>
+  void async_<%#function:eb%>eb<%/function:eb%><%^function:eb%>tm<%/function:eb%>_<%function:name%>(std::unique_ptr<apache::thrift::HandlerCallback<<% > types/type%>>> callback<%function:comma%><% > service_common/function_param_list%>) override;
+<%/function:oneway?%>
+<%/type:resolves_to_complex_return?%>
+<%#type:resolves_to_complex_return?%>
+  virtual void <%function:name%>(<% > types/type%>& /*_return*/<%function:comma%><% > service_common/function_param_list_commented_out%>);
+  folly::Future<<% > types/unique_ptr_type%>> future_<%function:name%>(<% > service_common/function_param_list%>) override;
+  void async_<%#function:eb%>eb<%/function:eb%><%^function:eb%>tm<%/function:eb%>_<%function:name%>(std::unique_ptr<apache::thrift::HandlerCallback<<% > types/unique_ptr_type%>>> callback<%function:comma%><% > service_common/function_param_list%>) override;
+<%/type:resolves_to_complex_return?%>
+<%#service:frozen2?%>
+<%^type:resolves_to_complex_return?%>
+  virtual <% > types/type%> frozen2_<%function:name%>(<% > service_common/frozen2_function_param_list%>);
+  folly::Future<<% > types/service_type%>> frozen2_future_<%function:name%>(<% > service_common/frozen2_function_param_list%>) override;
+<%#function:oneway?%>
+  void frozen2_async_<%#function:eb%>eb<%/function:eb%><%^function:eb%>tm<%/function:eb%>_<%function:name%>(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback<%function:comma%><% > service_common/frozen2_function_param_list%>) override;
+<%/function:oneway?%>
+<%^function:oneway?%>
+  void frozen2_async_<%#function:eb%>eb<%/function:eb%><%^function:eb%>tm<%/function:eb%>_<%function:name%>(std::unique_ptr<apache::thrift::HandlerCallback<<% > types/type%>>> callback<%function:comma%><% > service_common/frozen2_function_param_list%>) override;
+<%/function:oneway?%>
+<%/type:resolves_to_complex_return?%>
+<%#type:resolves_to_complex_return?%>
+  virtual void frozen2_<%function:name%>(<% > types/type%>& /*_return*/<%function:comma%><% > service_common/frozen2_function_param_list%>);
+  folly::Future<<% > types/unique_ptr_type%>> frozen2_future_<%function:name%>(<% > service_common/frozen2_function_param_list%>) override;
+  void frozen2_async_<%#function:eb%>eb<%/function:eb%><%^function:eb%>tm<%/function:eb%>_<%function:name%>(std::unique_ptr<apache::thrift::HandlerCallback<<% > types/unique_ptr_type%>>> callback<%function:comma%><% > service_common/frozen2_function_param_list%>) override;
+<%/type:resolves_to_complex_return?%>
+<%/service:frozen2?%>
+<%/type:deprecated_stream?%>
+<%/function:returnType%><%/service:functions%>
+<%#service:any_streams?%>
+  template <typename T>
+  std::pair<apache::thrift::Stream<T>, apache::thrift::StreamPublisher<T>>
+  createStreamPublisher(folly::Function<void()> onCanceled, size_t bufferSizeLimit = apache::thrift::StreamPublisher<T>::kNoLimit) {
+    return apache::thrift::StreamPublisher<T>::create(
+        folly::SerialExecutor::create(
+            folly::getKeepAliveToken(getThreadManager())),
+        std::move(onCanceled),
+        bufferSizeLimit);
+  }
+  template <typename Generator>
+  auto createStreamGenerator(Generator&& generator) {
+    return apache::thrift::StreamGenerator::create(
+        folly::SerialExecutor::create(
+            folly::getKeepAliveToken(getThreadManager())),
+        std::forward<Generator>(generator));
+  }
+<%/service:any_streams?%>
+};

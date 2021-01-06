@@ -1,0 +1,7 @@
+"CTRL+f
+"
+" Code format
+"
+" Clang style, fb default
+map <C-f> :pyf ~/vim/clang-format.py<CR>
+imap <C-f> <ESC>:pyf ~/vim/clang-format.py<CR>i

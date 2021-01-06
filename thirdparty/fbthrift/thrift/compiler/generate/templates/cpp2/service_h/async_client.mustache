@@ -1,0 +1,110 @@
+<%!
+
+  Copyright 2016 Facebook, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%>class <%service:name%>AsyncClient : public <%#service:extends%><% > common/namespace_cpp2%><%service:name%>AsyncClient<%/service:extends%><%^service:extends%>apache::thrift::GeneratedAsyncClient<%/service:extends%> {
+ public:
+  using <%#service:extends%><% > common/namespace_cpp2%><%service:name%>AsyncClient::<%service:name%>AsyncClient<%/service:extends%><%^service:extends%>apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient<%/service:extends%>;
+
+	// 主要用于服务注册，服务发现，服务调用自动关联
+	constexpr static char fullServiceName[] = "<%#program:namespace_cpp2%><%namespace:name%>.<%/program:namespace_cpp2%><%#service:namespace_cpp2%><%namespace:name%>.<%/service:namespace_cpp2%><%service:name%>";
+
+  char const* getServiceName() const noexcept override {
+    return "<%service:name%>";
+  }
+
+<%#service:functions%><%#function:returnType%>
+  virtual void <%function:name%>(std::unique_ptr<apache::thrift::RequestCallback> callback<%function:comma%><% > service_common/function_param_list_const%>);
+  virtual void <%function:name%>(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback<%function:comma%><% > service_common/function_param_list_const%>);
+ private:
+  virtual void <%function:name%>Impl(bool useSync, apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback<%function:comma%><% > service_common/function_param_list_const%>);
+ public:
+<%#type:deprecated_stream?%>
+  <%#type:streamElemType%>
+  virtual void <%function:name%>(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback<%function:comma%><% > service_common/function_param_list_const%>);
+  virtual wangle::ObservablePtr<<% > types/type%>> observable_<%function:name%>(<% > service_common/function_param_list_const%>);
+  virtual wangle::ObservablePtr<<% > types/type%>> observable_<%function:name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_const%>);
+  static folly::exception_wrapper recv_wrapped_<%function:name%>(<% > types/type%>& _return, ::apache::thrift::ClientReceiveState& state);
+    <%#type:resolves_to_complex_return?%>
+  static void recv_<%function:name%>(<% > types/type%>& _return, ::apache::thrift::ClientReceiveState& state);
+  // Mock friendly virtual instance method
+  virtual void recv_instance_<%function:name%>(<% > types/type%>& _return, ::apache::thrift::ClientReceiveState& state);
+    <%/type:resolves_to_complex_return?%>
+    <%^type:resolves_to_complex_return?%>
+  static <% > types/type%> recv_<%function:name%>(::apache::thrift::ClientReceiveState& state);
+  // Mock friendly virtual instance method
+  virtual <% > types/type%> recv_instance_<%function:name%>(::apache::thrift::ClientReceiveState& state);
+    <%/type:resolves_to_complex_return?%>
+  virtual folly::exception_wrapper recv_instance_wrapped_<%function:name%>(<% > types/type%>& _return, ::apache::thrift::ClientReceiveState& state);
+  template <typename Protocol_>
+  void <%function:name%>T(Protocol_* prot, bool useSync, apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback<%function:comma%><% > service_common/function_param_list_const%>);
+  <%/type:streamElemType%>
+<%/type:deprecated_stream?%>
+<%^type:deprecated_stream?%>
+<%^type:resolves_to_complex_return?%>
+  virtual <% > types/semi_type%> sync_<%function:name%>(<% > service_common/function_param_list_const%>);
+  virtual <% > types/semi_type%> sync_<%function:name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_const%>);
+<%/type:resolves_to_complex_return?%>
+<%#type:resolves_to_complex_return?%>
+  virtual void sync_<%function:name%>(<% > types/type%>& _return<%function:comma%><% > service_common/function_param_list_const%>);
+  virtual void sync_<%function:name%>(apache::thrift::RpcOptions& rpcOptions, <% > types/type%>& _return<%function:comma%><% > service_common/function_param_list_const%>);
+<%/type:resolves_to_complex_return?%>
+  virtual folly::Future<<% > types/service_type_semi%>> future_<%function:name%>(<% > service_common/function_param_list_const%>);
+  virtual folly::SemiFuture<<% > types/service_type_semi%>> semifuture_<%function:name%>(<% > service_common/function_param_list_const%>);
+  virtual folly::Future<<% > types/service_type_semi%>> future_<%function:name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_const%>);
+  virtual folly::SemiFuture<<% > types/service_type_semi%>> semifuture_<%function:name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_const%>);
+<%^function:oneway?%>
+  virtual folly::Future<std::pair<<% > types/service_type_semi%>, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_<%function:name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_const%>);
+  virtual folly::SemiFuture<std::pair<<% > types/service_type_semi%>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_<%function:name%>(apache::thrift::RpcOptions& rpcOptions<%function:comma%><% > service_common/function_param_list_const%>);
+<%/function:oneway?%>
+  virtual void <%function:name%>(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback<%function:comma%><% > service_common/function_param_list_const%>);
+<%#type:void?%>
+<%^function:oneway?%>
+  static folly::exception_wrapper recv_wrapped_<%function:name%>(::apache::thrift::ClientReceiveState& state);
+  static void recv_<%function:name%>(::apache::thrift::ClientReceiveState& state);
+  // Mock friendly virtual instance method
+  virtual void recv_instance_<%function:name%>(::apache::thrift::ClientReceiveState& state);
+  virtual folly::exception_wrapper recv_instance_wrapped_<%function:name%>(::apache::thrift::ClientReceiveState& state);
+<%/function:oneway?%>
+ private:
+  template <typename Protocol_>
+  void <%function:name%>T(Protocol_* prot, bool useSync, apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback<%function:comma%><% > service_common/function_param_list_const%>);
+ public:
+<%/type:void?%>
+<%^type:void?%>
+<%^function:oneway?%>
+  static folly::exception_wrapper recv_wrapped_<%function:name%>(<% > types/semi_type%>& _return, ::apache::thrift::ClientReceiveState& state);
+<%^type:resolves_to_complex_return?%>
+  static <% > types/semi_type%> recv_<%function:name%>(::apache::thrift::ClientReceiveState& state);
+  // Mock friendly virtual instance method
+  virtual <% > types/semi_type%> recv_instance_<%function:name%>(::apache::thrift::ClientReceiveState& state);
+<%/type:resolves_to_complex_return?%>
+<%#type:resolves_to_complex_return?%>
+  static void recv_<%function:name%>(<% > types/type%>& _return, ::apache::thrift::ClientReceiveState& state);
+  // Mock friendly virtual instance method
+  virtual void recv_instance_<%function:name%>(<% > types/type%>& _return, ::apache::thrift::ClientReceiveState& state);
+<%/type:resolves_to_complex_return?%>
+  virtual folly::exception_wrapper recv_instance_wrapped_<%function:name%>(<% > types/semi_type%>& _return, ::apache::thrift::ClientReceiveState& state);
+<%/function:oneway?%>
+ private:
+  template <typename Protocol_>
+  void <%function:name%>T(Protocol_* prot, bool useSync, apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback<%function:comma%><% > service_common/function_param_list_const%>);
+<%^function:oneway?%>
+ public:
+<%/function:oneway?%>
+<%/type:void?%>
+<%/type:deprecated_stream?%>
+<%/function:returnType%><%/service:functions%>
+};

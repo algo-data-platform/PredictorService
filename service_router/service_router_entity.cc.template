@@ -1,0 +1,7 @@
+#include "service_router/service_router_entity.h"
+
+namespace service_router {
+
+__SOURCE__DATA__
+
+}  // namespace service_router

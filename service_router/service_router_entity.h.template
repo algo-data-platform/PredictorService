@@ -1,0 +1,14 @@
+#pragma once
+
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include "folly/dynamic.h"
+#include "proxygen/lib/utils/Base64.h"
+
+namespace service_router {
+
+__HEADER__DATA__
+
+}  // namespace service_router

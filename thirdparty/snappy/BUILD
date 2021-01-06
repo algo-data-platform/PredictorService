@@ -1,0 +1,10 @@
+cc_library(
+    name="snappy",
+    srcs=[
+		"snappy-c.cc",
+		"snappy-sinksource.cc",
+		"snappy-stubs-internal.cc",
+		"snappy.cc",
+    ],
+	warning='no',
+)

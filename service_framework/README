@@ -1,0 +1,14 @@
+service_framework 项目
+
+目前有的基础库, 参考
+folly
+https://github.com/weiboad/
+https://github.com/weiboad/adbase
+
+目标: 
+可复用的基础组件
+
+基本功能:
+1. 服务打点lib
+2. 指标展示lib
+3. etc

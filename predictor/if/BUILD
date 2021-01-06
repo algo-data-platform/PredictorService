@@ -1,0 +1,11 @@
+fbthrift_library(
+  name="predictor",
+  srcs=[
+    'predictor.thrift'
+  ],
+  options='reflection',
+  include_prefix='predictor/if',
+	deps=[
+		'//thirdparty/fbthrift:thrift1',
+	]
+)

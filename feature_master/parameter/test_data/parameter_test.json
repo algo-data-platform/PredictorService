@@ -1,0 +1,44 @@
+{
+  "parameter_extractor_config": {
+    "user_test": {
+      "extractor": "id", 
+      "group": 5, 
+      "feature_names": [
+        "city", 
+        "gender", 
+        "tags"
+      ]
+    }, 
+    "emp_ctr": {
+      "extractor": "discrete", 
+      "extractor_args": "1,0.001,100,0,100", 
+      "group": 4, 
+      "feature_names": [
+        "ctr1", 
+        "ctr2"
+      ]
+    }, 
+    "uid": {
+      "extractor": "id", 
+      "group": 1, 
+      "feature_names": [
+        "id1", 
+        "id2"
+      ]
+    }, 
+    "city-gender-tags": {
+      "extractor": "cross", 
+      "group": 3, 
+      "feature_names": [
+        "city|gender|tags"
+      ]
+    }, 
+    "follow_list": {
+      "extractor": "id", 
+      "group": 2, 
+      "feature_names": [
+        "follow_list"
+      ]
+    }
+  }
+}

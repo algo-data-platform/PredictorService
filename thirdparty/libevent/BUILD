@@ -1,0 +1,62 @@
+cc_library(
+	name="event_core",
+	srcs=[
+		'buffer.c',
+		'bufferevent.c',
+		'bufferevent_filter.c',
+		'bufferevent_pair.c',
+		'bufferevent_ratelim.c',
+		'bufferevent_sock.c',
+		'event.c',
+		'evmap.c',
+		'evthread.c',
+		'evutil.c',
+		'evutil_rand.c',
+		'evutil_time.c',
+		'listener.c',
+		'log.c',
+		'signal.c',
+		'strlcpy.c',
+		'select.c',
+		'poll.c',
+		'bufferevent_openssl.c',
+		'evthread_pthread.c',
+		'epoll_sub.c',
+		'epoll.c',
+	],
+	incs=[
+		'include',
+	],
+	warning='no',
+)
+
+cc_library(
+	name="event_extra",
+	srcs=[
+		'event_tagging.c',
+		'http.c',
+		'evdns.c',
+		'evrpc.c'
+	],
+	deps=[
+		':event_core'
+	],
+	warning='no',
+)
+gen_rule(
+	name="event_deps",
+	cmd='touch $FIRST_OUT',
+	outs='event/build/event_deps.cpp',
+)
+cc_library(
+	name="event",
+	srcs=[
+		'event/build/event_deps.cpp'
+	],
+	deps=[
+		':event_deps',
+		':event_core',
+		':event_extra'
+	],
+	warning='no',
+)

@@ -1,0 +1,90 @@
+<%!
+
+  Copyright 2016 Facebook, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><% > Autogen%>
+#include "<%program:include_prefix%><%program:name%>_types.h"
+#include "<%program:include_prefix%><%program:name%>_types.tcc"
+
+#include <algorithm>
+#include <folly/Indestructible.h>
+
+#include "<%program:include_prefix%><%program:name%>_data.h"
+
+<% > common/push_and_undef_colliding_macros%>
+<% > module_types_cpp/declare_enums%>
+<%#program:structs%><%!
+%><% > common/namespace_cpp2_begin%>
+
+
+<%^struct:union?%>
+<%#struct:fields_contain_cpp_ref?%><%^struct:cpp_noexcept_move_ctor%>
+<% > module_types_cpp/copy_ctor%>
+
+
+<% > module_types_cpp/assign_overload%>
+
+
+<%/struct:cpp_noexcept_move_ctor%><%/struct:fields_contain_cpp_ref?%>
+<% > module_types_cpp/declare_members%>
+
+
+<%^struct:cpp_noncomparable%>
+<% > module_types_cpp/eq_overload%>
+<%#struct:is_struct_orderable?%>
+
+
+<% > module_types_cpp/lt_overload%>
+<%/struct:is_struct_orderable?%>
+<%/struct:cpp_noncomparable%>
+
+
+<% > module_types_cpp/getters_setters%>
+<% > module_types_cpp/translate_field_name%>
+
+<% > module_types_cpp/swap%>
+<%/struct:union?%>
+<%#struct:union?%>
+<% > module_types_cpp/union_declare_members%>
+
+<%^struct:cpp_noncomparable%>
+<% > module_types_cpp/union_eq_overload%>
+<%/struct:cpp_noncomparable%>
+
+<% > module_types_cpp/union_setters%>
+<% > module_types_cpp/translate_field_name%>
+<% > module_types_cpp/union_swap%>
+<%/struct:union?%>
+
+template void <%struct:name%>::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t <%struct:name%>::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t <%struct:name%>::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t <%struct:name%>::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void <%struct:name%>::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t <%struct:name%>::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t <%struct:name%>::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t <%struct:name%>::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+<%#program:json?%>
+template void <%struct:name%>::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t <%struct:name%>::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t <%struct:name%>::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t <%struct:name%>::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+<%/program:json?%>
+
+<% > common/namespace_cpp2_end%>
+
+<% > module_types_cpp/frozen%>
+<%/program:structs%>
+<% > common/pop_colliding_macros%>

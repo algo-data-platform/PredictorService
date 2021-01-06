@@ -1,0 +1,16 @@
+{
+    "framework": "tf",
+    "version": "v1",
+    "model": "estimator_multi_fea",
+    "model_full_name": "tf_estimator_multi_fea_model",
+    "model_dir": "tf_model",
+    "predict_tag": "add:0",
+    "model_tag": "serve",
+    "predict_signature": "predict",
+    "model_timestamp": "20201221055500",
+    "output_tags": {
+       "user_vec": "user/logits/BiasAdd:0",
+       "ad_vec": "ad/logits/BiasAdd:0",
+       "bias": "add:0"
+    }
+}

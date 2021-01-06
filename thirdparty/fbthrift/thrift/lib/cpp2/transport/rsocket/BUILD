@@ -1,0 +1,11 @@
+fbthrift_library(
+    name="Config",
+    srcs=[
+        'Config.thrift'
+    ],
+    options='',
+    include_prefix='thrift/lib/cpp2/transport/rsocket',
+	deps=[
+		'//thirdparty/fbthrift:thrift1'
+	]
+)

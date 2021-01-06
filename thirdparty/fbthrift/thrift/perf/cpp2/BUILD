@@ -1,0 +1,38 @@
+cc_library(
+  name='util_lib',
+  srcs=[
+    'util/Util.cpp'
+  ],
+  incs=[
+    './util/'
+  ],
+  warning='no'
+)
+cc_binary(
+  name='cpp2_client',
+  srcs=[
+    'client/Client.cpp',
+  ],
+  deps=[
+   '//thirdparty/fbthrift/thrift/perf/cpp2/if:benchmark',
+   '//thirdparty/fbthrift:thriftcpp2',
+   ':cpp2_server',
+  ],
+  warning='no'
+)
+cc_binary(
+  name='cpp2_server',
+  srcs=[
+    'server/Server.cpp'
+  ],
+  deps=[
+    '//thirdparty/fbthrift/thrift/perf/cpp2/if:benchmark',
+    '//thirdparty/fbthrift:thriftcpp2',
+    '//thirdparty/proxygen:proxygenhttpserver',
+    '#unwind',
+    '#dl',
+    '#keyutils',
+    '#resolv'
+  ],
+  warning='no'
+)

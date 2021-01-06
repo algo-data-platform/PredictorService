@@ -1,0 +1,3 @@
+可以参考 https://github.com/weiboad/adbase 中的 Metrics 库
+基于 proxygen 封装 http server 实现 service_status 接口供后续监控系统实时采集数据
+集成在所有的 fbthrift service中

@@ -1,0 +1,18 @@
+{
+  "kafka_producer_config" : {
+    "kafka_config" :[
+      "metadata.broker.list",
+      "<URL>:<PORT>",
+      "security.protocol",
+      "sasl_plaintext",
+      "sasl.mechanisms",
+      "PLAIN",
+      "sasl.username",
+      "<USERNAME>",
+      "sasl.password",
+      "<PASSWORD>"
+      ],
+    "topic" : "<TOPIC>",
+    "partition_num" : -1
+  }
+}

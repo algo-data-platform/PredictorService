@@ -1,0 +1,10 @@
+{
+  "framework": "tf",
+  "version": "v0",
+  "model": "estimator_single_fea",
+  "model_full_name": "tf_estimator_single_fea_model",
+  "model_dir": "tf_model",
+  "predict_tag": "head/predictions/logistic:0",
+  "model_tag": "serve",
+  "predict_signature": "predict"
+}

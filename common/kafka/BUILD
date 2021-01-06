@@ -1,0 +1,54 @@
+cc_library(
+  name='libkafka',
+  srcs=[
+  ],
+  deps=[
+	':libproducer',
+	':libconsumer',
+  ]
+)
+cc_library(
+  name='libproducer',
+  srcs=[
+    'producer.cpp',
+  ],
+  deps=[
+      '//thirdparty/librdkafka:rdkafka++',
+      '//thirdparty/glog:glog',
+      '//thirdparty/folly:folly',
+  ]
+)
+cc_library(
+  name='libconsumer',
+  srcs=[
+    'consumer.cpp',
+  ],
+  deps=[
+      '//thirdparty/librdkafka:rdkafka++',
+      '//thirdparty/glog:glog',
+      '//thirdparty/folly:folly',
+  ]
+)
+	
+cc_binary(
+	name='producer_test',
+	srcs=[
+		'producer_test.cpp',
+	],
+	deps=[
+		':libkafka',
+		'//thirdparty/gflags:gflags',
+      		'//thirdparty/folly:folly',
+	]
+)
+cc_binary(
+	name='consumer_test',
+	srcs=[
+		'consumer_test.cpp',
+	],
+	deps=[
+		':libkafka',
+		'//thirdparty/gflags:gflags',
+      		'//thirdparty/folly:folly',
+	]
+)

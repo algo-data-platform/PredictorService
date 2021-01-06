@@ -1,0 +1,10 @@
+cc_library(
+    name="lz4",
+    srcs=[
+		'lib/lz4.c',
+		'lib/lz4frame.c',
+		'lib/lz4hc.c',
+		'lib/xxhash.c',
+    ],
+	warning='no',
+)

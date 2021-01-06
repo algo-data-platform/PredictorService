@@ -1,0 +1,17 @@
+-log_dir=/tmp
+-logtostderr=false
+-predictor_service_name=predictor_service_dev
+-port=10047
+-http-port=10048
+-idle-timeout=3600000
+-model_path=../data
+-example_snapshot_producer_config=../conf/example_snapshot_producer.json
+-example_snapshot_frequency=0
+-fea_extract_snapshot_producer_config=../conf/fea_extract_snapshot_producer.json
+-fea_extract_snapshot_frequency=0
+-http_server_work_thread_num=10
+-min_ads_per_thread=10
+-request_cpu_thread_num=0
+-use_dynamic_weight=1
+-use_model_service=1
+-use_dynamic_unregister_service=1

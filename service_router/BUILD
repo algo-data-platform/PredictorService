@@ -1,0 +1,96 @@
+gen_rule(
+  name='entity_generator',
+  srcs=[
+    'service_router_entity.config',
+  ],
+  cmd='./build_tools/entity_generator.php -c./service_router/service_router_entity.config -o ./blade-bin/service_router/service_router_entity -t ./service_router/service_router_entity',
+  outs=[
+    'service_router_entity.cc',
+    'service_router_entity.h'
+  ]
+)
+
+cc_library(
+  name='service_router',
+  srcs=[
+    'registry.cc',
+    'service_router_entity.cc',
+    'router.cc',
+    'service_info_puller.cc',
+    'thrift_client.cc',
+    'thrift_server.cc',
+    'load_balance.cc',
+    'connection_pool.cc',
+  ],
+  optimize=[
+     '-Wno-potentially-evaluated-expression'
+  ],
+  deps=[
+      ':entity_generator',
+      '//service_framework:consul',
+      '//common:util',
+      '//common:metric',
+      '//thirdparty/hash:hash',
+      '//thirdparty/fbthrift:thriftcpp2',
+      '//thirdparty/proxygen:proxygenhttpserver',
+  ]
+)
+
+cc_library(
+  name='service_router_http_server',
+  srcs=[
+    'http.cc'
+  ],
+  deps=[
+      ':service_router',
+      '//service_framework:http_server',
+      '//common:metric',
+  ]
+)
+
+
+cc_binary(
+  name='service_manager',
+  srcs=[
+    'service_manager.cc'    
+  ],
+  deps=[
+    ':service_router',
+    '#unwind'
+  ]
+)
+
+cc_binary(
+  name='test_consul_registry',
+  srcs=[
+    'test/consul.cc'    
+  ],
+  deps=[
+    ':service_router',
+    '#unwind'
+  ]
+)
+
+cc_binary(
+  name='bench',
+  srcs=[
+    'test/bench.cc'    
+  ],
+  deps=[
+    ':service_router',
+    ':service_router_http_server',
+    '//common:metric',
+    '#unwind'
+  ]
+)
+
+cc_binary(
+  name='heart_block_test',
+  srcs=[
+    'test/heart_block_test.cc'    
+  ],
+  deps=[
+    ':service_router',
+    '#unwind'
+  ]
+)

@@ -1,0 +1,30 @@
+# thrift compiler
+cc_library(
+	name="frontend",
+	srcs=[
+		'compiler.cc',
+	],
+	deps=[
+		'//thirdparty/fbthrift:compiler_ast',
+		'//thirdparty/fbthrift:compiler_base',
+		'//thirdparty/boost:boost_filesystem',
+		'//thirdparty/boost:boost_system',
+		'//thirdparty/boost:boost_python27',
+		'#python2.7',
+		'//thirdparty/openssl:ssl',
+	],
+	warning='no',
+)
+
+cc_binary(
+	name='front',
+	srcs=[
+		'front.cpp'		
+	],
+	deps=[
+		':frontend',
+		'#dl'
+	],
+	dynamic_link=True,
+	export_dynamic=True,
+)

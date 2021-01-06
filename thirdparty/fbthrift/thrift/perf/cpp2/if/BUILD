@@ -1,0 +1,13 @@
+fbthrift_library(
+  name='benchmark',
+  srcs=[
+    'ApiBase.thrift',
+    'Api.thrift',
+    'StreamApi.thrift'
+  ],
+  options='reflection',
+  include_prefix='thrift/perf/cpp2/if',
+  deps=[
+      '//thirdparty/fbthrift:thrift1'
+  ]
+)

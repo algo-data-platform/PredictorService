@@ -1,0 +1,11 @@
+fbthrift_library(
+  name="feature_master",
+  srcs=[
+    'feature_master.thrift'
+  ],
+  options='reflection',
+  include_prefix='feature_master/if',
+	deps=[
+		'//thirdparty/fbthrift:thrift1'
+	]
+)

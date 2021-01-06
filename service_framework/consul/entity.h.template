@@ -1,0 +1,16 @@
+#pragma once
+
+#include "folly/dynamic.h"
+#include "proxygen/lib/utils/Base64.h"
+
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+namespace service_framework {
+namespace consul {
+
+__HEADER__DATA__
+
+}  // namespace consul
+}  // namespace service_framework

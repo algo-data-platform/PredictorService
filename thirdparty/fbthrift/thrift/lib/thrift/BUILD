@@ -1,0 +1,33 @@
+fbthrift_library(
+    name="reflection",
+    srcs=[
+        'reflection.thrift'
+    ],
+    options='templates',
+    include_prefix='thrift/lib/thrift',
+	deps=[
+		'//thirdparty/fbthrift:thrift1'
+	]
+)
+fbthrift_library(
+    name="frozen",
+    srcs=[
+        'frozen.thrift'
+    ],
+    options='',
+    include_prefix='thrift/lib/thrift',
+	deps=[
+		'//thirdparty/fbthrift:thrift1'
+	]
+)
+fbthrift_library(
+    name="RpcMetadata",
+    srcs=[
+        'RpcMetadata.thrift'
+    ],
+    options='',
+    include_prefix='thrift/lib/thrift',
+	deps=[
+		'//thirdparty/fbthrift:thrift1'
+	]
+)

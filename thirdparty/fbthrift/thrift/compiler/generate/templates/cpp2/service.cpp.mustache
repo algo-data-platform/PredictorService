@@ -1,0 +1,77 @@
+<%!
+
+  Copyright 2016 Facebook, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+%><% > Autogen%>
+#include "<%service:include_prefix%><%service:name%>.h"
+#include "<%service:include_prefix%><%service:name%>.tcc"
+
+#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
+#include <thrift/lib/cpp2/protocol/Protocol.h>
+<%#service:frozen2?%>
+#include <thrift/lib/cpp2/protocol/Frozen2Protocol.h>
+<%/service:frozen2?%>
+<%#service:any_streams?%>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/cpp2/transport/core/ThriftRequest.h>
+#include <thrift/lib/cpp2/transport/core/ThriftChannelIf.h>
+<%/service:any_streams?%>
+
+<% > common/namespace_cpp2_begin%>
+
+// 主要用于服务注册，服务发现，服务调用自动关联
+constexpr char <%service:name%>SvIf::fullServiceName[];
+
+std::unique_ptr<apache::thrift::AsyncProcessor> <%service:name%>SvIf::getProcessor() {
+  return std::make_unique<<%service:name%>AsyncProcessor>(this);
+}
+<% > service_cpp/service_interface_impl%>
+
+<% > service_cpp/service_null_impl%>
+<%#service:frozen2?%>
+<% > service_cpp/process_frozen2%>
+<%/service:frozen2?%>
+const char* <%service:name%>AsyncProcessor::getServiceName() {
+  return "<%service:name%>";
+}
+
+folly::Optional<std::string> <%service:name%>AsyncProcessor::getCacheKey(folly::IOBuf* buf, apache::thrift::protocol::PROTOCOL_TYPES protType) {
+  return apache::thrift::detail::ap::get_cache_key(buf, protType, cacheKeyMap_);
+}
+
+void <%service:name%>AsyncProcessor::process(std::unique_ptr<apache::thrift::ResponseChannel::Request> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  apache::thrift::detail::ap::process(this, std::move(req), std::move(buf), protType, context, eb, tm);
+}
+
+bool <%service:name%>AsyncProcessor::isOnewayMethod(const folly::IOBuf* buf, const apache::thrift::transport::THeader* header) {
+  return apache::thrift::detail::ap::is_oneway_method(buf, header, onewayMethods_);
+}
+
+<% > service_cpp/oneway_methods%>
+<% > service_cpp/cache_key_map%>
+<% > service_cpp/binary_processmap%>
+
+<% > service_cpp/compact_processmap%>
+
+<%#service:frozen2?%>
+<% > service_cpp/frozen2_processmap%>
+
+<%/service:frozen2?%>
+<% > common/namespace_cpp2_end%>
+
+namespace apache { namespace thrift {
+
+}} // apache::thrift

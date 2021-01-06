@@ -1,0 +1,49 @@
+cc_library(
+  name='http_client',
+  srcs=[
+    'http/http_connection.cc',
+    'http/http_client_manager.cc',
+  ],
+  deps=[
+      '//thirdparty/proxygen:proxygenhttp',
+      '//thirdparty/folly:folly',
+  ]
+)
+
+cc_library(
+  name='http_server',
+  srcs=[
+    'http/http_server_manager.cc',
+  ],
+  deps=[
+      '//thirdparty/proxygen:proxygenhttpserver',
+      '//common:metric',
+      '//thirdparty/folly:folly',
+  ]
+)
+
+gen_rule(
+  name='entity_generator',
+  srcs=[
+    'consul/entity.config',
+  ],
+  cmd='./build_tools/entity_generator.php -c./service_framework/consul/entity.config -o ./blade-bin/service_framework/consul/entity -t ./service_framework/consul/entity',
+  outs=[
+    'consul/entity.cc',
+    'consul/entity.h'
+  ]
+)
+
+cc_library(
+  name='consul',
+  srcs=[
+    'consul/entity.cc',
+    'consul/kv_client.cc',
+    'consul/agent_client.cc',
+  ],
+  deps=[
+      ':http_client',
+      ':entity_generator',
+      '//common:util'
+  ]
+)
