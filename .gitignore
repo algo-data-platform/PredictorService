@@ -1,6 +1,5 @@
 .blade.test.stamp
 .Building.lock
-.gitignore
 .sconsign.dblite
 .arcconfig
 blade-bin
@@ -26,3 +25,8 @@ thirdparty/catboost/lib64_debug
 thirdparty/jemalloc/lib64_release
 thirdparty/jemalloc/lib64_debug
 thirdparty/jemalloc/include
+thirdparty/fbthrift/build/fbcode_builder/.gitignore
+thirdparty/fbthrift/thrift/lib/java/.gitignore
+thirdparty/fbthrift/thrift/lib/perl/.gitignore
+thirdparty/mstch/.gitignore
+thirdparty/rsocket-cpp/.gitignore
