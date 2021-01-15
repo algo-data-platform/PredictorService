@@ -1,7 +1,7 @@
 cc_binary(
     name='predictor_server',
     srcs=[
-        'server/predictor_service.cc',
+        'server/predictor_service/predictor_service.cc',
         'server/predictor_server.cc',
         'server/model_manager/model_manager.cc',
         'server/model_manager/framework/model.cc',
@@ -14,9 +14,6 @@ cc_binary(
         'server/model_manager/framework/xgboost/xgboost_model_tree.cc',
         'server/model_manager/framework/catboost/catboost_framework.cc',
         'server/model_manager/framework/catboost/catboost_model.cc',
-        'server/resource_manager.cc',
-        'server/kafka_producer.cc',
-        'server/fea_extract_snapshot.cc',
         'server/router/predictor_router.cc',
         'server/http_service/http_service.cc',
     ],
@@ -27,13 +24,14 @@ cc_binary(
     ],
     deps=[
         ':predictor_util',
+        ':global_resource',
+        ':feature_extractor',
         '//predictor/if:predictor',
         '//feature_master/if:feature_master',
         '//service_router:service_router',
         '//thirdparty/proxygen:proxygenhttpserver',
         '//common:fileutil',
         '//common:metric',
-        '//common/kafka:libkafka',
         '//service_router:service_router_http_server',
         '//common:util',
         '//thirdparty/fbthrift:thriftcpp2',
@@ -74,6 +72,22 @@ cc_library(
 )
 
 cc_library(
+    name='global_resource',
+    srcs=[
+        'global_resource/resource_manager.cc',
+        'global_resource/kafka_producer.cc',
+    ],
+    deps=[
+        ':predictor_util',
+        '//common/kafka:libkafka',
+        '#unwind',
+        '#dl',
+        '#keyutils',
+        '#resolv',
+    ],
+)
+
+cc_library(
     name='predictor_util',
     srcs=[
         'util/predictor_util.cc',
@@ -93,22 +107,48 @@ cc_library(
     ],
 )
 
-
-cc_test(
-    name='predictor_util_unittest',
+cc_library(
+    name='feature_extractor',
     srcs=[
-        'util/predictor_util_unittest.cc',
+        'server/feature_extractor/fea_extract_snapshot.cc',
+        'server/feature_extractor/feature_extractor.cc',
     ],
     incs=[
+        '../thirdparty/protobuf/src',
+        '../thirdparty/tensorflow/include',
     ],
     deps=[
+        ':global_resource',
         ':predictor_util',
-        '//thirdparty/fbthrift:thriftcpp2',
-        '//thirdparty/googletest:gtest',
         '#unwind',
         '#dl',
         '#keyutils',
         '#resolv',
     ],
+    link_all_symbols = True,
 )
 
+cc_library(
+    name = 'config',
+    srcs = [
+        'config/config_util.cc',
+    ],
+    deps = [
+        '//common:fileutil',
+        '//predictor/if:config',
+        '#unwind',
+    ]
+)
+
+cc_test(
+    name = 'config_test',
+    srcs = [
+        'config/config_util_unittest.cc',
+    ],
+    deps = [
+        ':config',
+    ],
+    testdata = [
+        'config/testdata/',
+    ] 
+)

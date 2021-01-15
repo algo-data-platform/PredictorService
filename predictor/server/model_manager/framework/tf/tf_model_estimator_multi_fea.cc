@@ -12,7 +12,7 @@
 #include "common/file/file_util.h"
 #include "predictor/server/model_manager/framework/tf/tf_model_estimator.h"
 #include "predictor/util/predictor_constants.h"
-#include "predictor/server/resource_manager.h"
+#include "predictor/global_resource/resource_manager.h"
 #include "predictor/util/predictor_util.h"
 
 #include <sys/time.h>
@@ -21,7 +21,7 @@ namespace predictor {
 
 namespace {
 
-constexpr char LOG_CATEGORY[] = "tf_model_estimator_lite.cc: ";
+constexpr char LOG_CATEGORY[] = "tf_model_estimator_multi_fea.cc: ";
 
 }  // namespace
 
@@ -178,6 +178,29 @@ bool TFModelEstimatorMultiFea::calculateVector(CalculateVectorResponse* calculat
   examples.emplace_back(1, std::move(fea));
   return tfCalculateVector<std::unordered_map<std::string, const feature_master::Feature*>>(
       calculate_vector_response, examples, calculate_vector_request.get_output_names());
+}
+
+
+bool TFModelEstimatorMultiFea::calculateBatchVector(CalculateBatchVectorResponse* batch_response,
+                                           const CalculateBatchVectorRequest& batch_request) {
+  std::vector<std::pair<int64_t, std::unordered_map<std::string, const feature_master::Feature*>>> examples;
+  batch_response->set_req_id(batch_request.get_req_id());
+  batch_response->set_model_timestamp(model_timestamp_);
+  const std::map<int64_t, feature_master::Features> &feature_map = batch_request.get_features_map();
+
+  for (const auto &item_features : feature_map) {
+    int64_t adid = item_features.first;
+    std::unordered_map<std::string, const feature_master::Feature*> fea;
+    for (const auto& feature : item_features.second.get_features()) {
+      const std::string& feature_name = feature.get_feature_name();
+      fea[feature_name] = &feature;
+    }
+    examples.emplace_back(adid, std::move(fea));
+  }
+
+  return tfCalculateVector<std::unordered_map<std::string, const feature_master::Feature*>,
+                          CalculateBatchVectorResponse>(batch_response, examples,
+                                                        batch_request.get_output_names());
 }
 
 REGISTER_MODEL(TFModelEstimatorMultiFea, estimator_multi_fea).describe("This is a tf estimator multi fea model.");

@@ -24,6 +24,7 @@ constexpr char MODEL_TIMESTAMP[] = "model_timestamp";
 constexpr char COMMON_MODEL_FILE[] = "model_file";
 constexpr char COMMON_FEALIB_PATH[] = "fealib_path";
 constexpr char FEATURE_FRAMEWORK[] = "feature_framework";
+constexpr char CONFIG_FEATURE_CLASS_NAME[] = "feature_class";
 
 // feature extractor
 constexpr char FEALIB_CONFIG[] = "fealib_config";
@@ -50,6 +51,10 @@ using MetricTagsMap = std::unordered_map<std::string, std::string>;
 using PredRes = std::map<int64_t, std::map<std::string, double> >;
 
 // common
+const std::vector<int> LEVELS = {60};  // seconds
+const std::vector<int> MINUTES = {1};  // meter minutes
+const std::vector<double> PERCENTILES = {0.999, 0.99, 0.5};  // histogram percentiles
+
 constexpr char ERROR[] = "error";
 constexpr char SDK_MODULE_NAME[] = "predictor_sdk";
 constexpr char TAG_CATEGORY[] = "category";
@@ -70,11 +75,17 @@ constexpr char PREDICTOR_ROUTER_SERVICE_NAME[] = "predictor_router_service";
 constexpr char SERVER_MODE[] = "ServerMode";
 constexpr char ROUTER_MODE[] = "RouterMode";
 
+// router constants
+constexpr char ROUTER_OP[] = "router_op";
+constexpr char SIMPLE_FORWARD[] = "SimpleForward";
+constexpr char SPLIT_REQUEST[] = "SplitRequest";
+
 // request type
 constexpr char TAG_REQ_TYPE[] = "request_type";
 constexpr char REQ_TYPE_PREDICT[] = "predict";
 constexpr char REQ_TYPE_MULTI_PREDICT[] = "multi_predict";
 constexpr char REQ_TYPE_CALCULATE_VECTOR[] = "calculate_vector";
+constexpr char REQ_TYPE_CALCULATE_BATCH_VECTOR[] = "calculate_batch_vector";
 
 // timer
 constexpr char TIME_CONSUMING[] = "consuming";
@@ -83,6 +94,7 @@ constexpr char SYNC_TIME_CONSUMING[] = "sync_consuming";
 constexpr char MODEL_CONSUMING[] = "model_consuming";
 constexpr char CHANNEL_TIME_CONSUMING[] = "channel_consuming";
 constexpr char FORWARD_MULTI_PREDICT_TIME_CONSUMING[] = "forward_multi_predict_consuming";
+constexpr char SPLIT_MULTI_PREDICT_TIME_CONSUMING[] = "split_multi_predict_consuming";
 constexpr double TIMER_BUCKET_SCALE = 1;
 constexpr double TIMER_MIN = 0;
 constexpr double TIMER_MAX = 100;
@@ -90,6 +102,7 @@ constexpr char TIMER_TAG_req[] = "request";
 constexpr char TIMER_TAG_ctr[] = "ctr_predict_request";
 constexpr char TIMER_TAG_predictor_rpc[] = "predictor_rpc";
 constexpr char TF_CONSUMING[] = "tf_consuming";
+constexpr char FEATURE_CONSUMING[] = "feature_consuming";
 constexpr char ITEM_CONSUMING[] = "item_consuming";
 constexpr char REQUEST_TASK_CONSUMING[] = "request_task_consuming";
 constexpr char HEAVY_TASK_CONSUMING[] = "heavy_task_consuming";
@@ -106,6 +119,7 @@ constexpr char MODEL_NUM_COUNT[] = "model_numcounting";
 constexpr char CHANNEL_NUM_COUNT[] = "channel_numcounting";
 constexpr char COMMON_FEATURE_NUM_COUNT[] = "common_feature_numcounting";
 constexpr char ITEM_FEATURE_NUM_COUNT[] = "item_feature_numcounting";
+constexpr char ROUTER_ITEM_RESP_RATIO[] = "router_item_resp_ratio";
 constexpr char AVG_CTR[] = "avg_ctr";
 constexpr double HISTOGRAMS_BUCKET_SCALE = 1;
 constexpr double HISTOGRAMS_MIN = 0;

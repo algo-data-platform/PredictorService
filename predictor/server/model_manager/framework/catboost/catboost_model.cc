@@ -3,7 +3,7 @@
 #include "common/util.h"
 #include "predictor/util/predictor_util.h"
 #include "predictor/util/predictor_constants.h"
-#include "predictor/server/resource_manager.h"
+#include "predictor/global_resource/resource_manager.h"
 #include <folly/ScopeGuard.h>
 
 DECLARE_int64(min_items_per_thread);

@@ -12,7 +12,7 @@
 #include "common/file/file_util.h"
 #include "predictor/server/model_manager/framework/tf/tf_model_estimator.h"
 #include "predictor/util/predictor_constants.h"
-#include "predictor/server/resource_manager.h"
+#include "predictor/global_resource/resource_manager.h"
 
 #include <sys/time.h>
 
@@ -20,7 +20,7 @@ namespace predictor {
 
 namespace {
 
-constexpr char LOG_CATEGORY[] = "tf_model_estimator_fans.cc: ";
+constexpr char LOG_CATEGORY[] = "tf_model_estimator_single_fea.cc: ";
 
 }  // namespace
 

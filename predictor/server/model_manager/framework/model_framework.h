@@ -32,6 +32,10 @@ class ModelFramework {
     return false;
   }
 
+  virtual bool calculateBatchVector(CalculateBatchVectorResponse* batch_response,
+                               const CalculateBatchVectorRequest& batch_request,
+                               const std::string& model_full_name) const;
+
   static const std::shared_ptr<ModelFrameworkFactory> getModelFramework(const std::string& model_full_name,
                                                                         const std::string& req_id = "");
 };

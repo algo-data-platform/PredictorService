@@ -17,7 +17,8 @@ class TFModelEstimatorMultiFea : public TFModelEstimator {
   bool init(const std::string& path_prefix, const rapidjson::Document& document) override;
   bool calculateVector(CalculateVectorResponse* calculate_vector_response,
                        const CalculateVectorRequest& calculate_vector_request) override;
-
+  bool calculateBatchVector(CalculateBatchVectorResponse* batch_response,
+                            const CalculateBatchVectorRequest& batch_request) override;
 protected:
   bool tfCalculateOutputs(
     std::vector<tensorflow::Tensor>* outputs,

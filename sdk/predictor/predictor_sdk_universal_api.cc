@@ -69,7 +69,7 @@ feature_master::Feature featureParse(const PredictFeature& predict_feature) {
       break;
     }
   }
-  return std::move(master_feature);
+  return master_feature;
 }
 
 PredictRequest PredictClientRequest::toPredictRequest() const {
@@ -121,7 +121,7 @@ std::vector<PredictClientResponse> PredictResponsesFutureImpl::get() {
   }
   std::vector<PredictClientResponse> client_response_list;
   packClientResponses(&client_response_list, responses);
-  return std::move(client_response_list);
+  return client_response_list;
 }
 
 namespace client_util {
@@ -196,11 +196,6 @@ bool PredictorClientSDK::predict(std::vector<PredictClientResponse>* client_resp
             // thriftServiceCall will catch all exceptions related to transport and connection, and everything else.
             // Here we just want to catch logical error, add a log, and throw it again.
             try {
-              static const MetricTagsMap timer_tags_map{
-                  {TAG_CATEGORY, TIMER_TAG_predictor_rpc}};
-              auto timers = metrics::Metrics::getInstance()->buildTimers(
-                  SDK_MODULE_NAME, SYNC_TIME_CONSUMING, TIMER_BUCKET_SCALE, TIMER_MIN, TIMER_MAX, timer_tags_map);
-              metrics::Timer timer(timers.get());
               client->sync_predict(rpc_options, predict_responses, predict_requests);
             } catch (predictor::PredictException& ex) {
               FB_LOG_EVERY_MS(ERROR, 2000) << ex.get_message();
@@ -271,12 +266,6 @@ bool PredictorClientSDK::future_predict(std::unique_ptr<PredictResponsesFuture>*
             // thriftServiceCall will catch all exceptions related to transport and connection, and everything else.
             // Here we just want to catch logical error, add a log, and throw it again.
             try {
-              static const MetricTagsMap timer_tags_map{
-                  {TAG_CATEGORY, TIMER_TAG_predictor_rpc}};
-              auto timers = metrics::Metrics::getInstance()->buildTimers(SDK_MODULE_NAME, ASYNC_TIME_CONSUMING,
-                                                                         TIMER_BUCKET_SCALE, TIMER_MIN, TIMER_MAX,
-                                                                         timer_tags_map);
-              metrics::Timer timer(timers.get());
               auto fut_impl = std::make_unique<PredictResponsesFutureImpl>();
               fut_impl->fut_ptr = std::move(std::make_unique<folly::Future<predictor::PredictResponses>>(
                   client->future_predict(rpc_options, predict_requests)));
@@ -315,18 +304,39 @@ CalculateVectorRequest CalculateVectorClientRequest::toCalculateVectorRequest() 
     request.features.features.emplace_back(std::move(featureParse(it)));
   }
 
-  return std::move(request);
+  return request;
 }
 
-void packCalculaterClientResponses(std::vector<CalculateVectorClientResponse>* client_response_list_ptr,
-                         const std::vector<CalculateVectorResponse>& responses) {
+CalculateBatchVectorRequest CalculateBatchVectorClientRequest::toCalculateBatchVectorRequest() const {
+  // transform client req to predictor req
+  predictor::CalculateBatchVectorRequest request;
+  request.set_req_id(req_id);
+  request.set_model_name(model_name);
+  request.set_channel(channel);
+  request.set_output_names(output_names);
+  for (const auto &item_features : feature_map) {
+    feature_master::Features features;
+    features.features.reserve(item_features.second.size());
+    for (const auto &it : item_features.second) {
+      features.features.push_back(featureParse(it));
+    }
+    request.features_map.emplace(item_features.first, std::move(features));
+  }
+
+  return request;
+}
+
+template <class ClientResponseType, class ResponseType>
+void packCalculaterClientResponses(std::vector<ClientResponseType>* client_response_list_ptr,
+                         const std::vector<ResponseType>& responses) {
   if (!client_response_list_ptr) {
     LOG(ERROR) << "invalid client_response_list_ptr";
     return;
   }
-  std::vector<CalculateVectorClientResponse>& client_response_list = *client_response_list_ptr;
+  std::vector<ClientResponseType>& client_response_list = *client_response_list_ptr;
+  client_response_list.reserve(responses.size());
   for (const auto& response : responses) {
-    CalculateVectorClientResponse client_response;
+    ClientResponseType client_response;
     client_response.return_code = response.return_code;
     client_response.model_timestamp = response.model_timestamp;
     client_response.req_id = response.get_req_id();
@@ -339,13 +349,6 @@ void packCalculaterClientResponses(std::vector<CalculateVectorClientResponse>* c
 bool PredictorClientSDK::calculate_vector(std::vector<CalculateVectorClientResponse>* client_response_list,
                                  const std::vector<CalculateVectorClientRequest>& client_request_list,
                                  const PredictorClientOption &predictor_client_option) {
-  // initialize timer metric
-  static const MetricTagsMap timer_tags_map{
-    {TAG_CATEGORY, TIMER_TAG_calculate_vector}};
-  auto timers = metrics::Metrics::getInstance()->buildTimers(SDK_MODULE_NAME, SYNC_TIME_CONSUMING,
-                                                             TIMER_BUCKET_SCALE, TIMER_MIN, TIMER_MAX, timer_tags_map);
-  metrics::Timer timer(timers.get());
-
   predictor::CalculateVectorResponses calculate_vector_responses;
   predictor::CalculateVectorRequests calculate_vector_requests;
 
@@ -368,11 +371,6 @@ bool PredictorClientSDK::calculate_vector(std::vector<CalculateVectorClientRespo
             // thriftServiceCall will catch all exceptions related to transport and connection, and everything else.
             // Here we just want to catch logical error, add a log, and throw it again.
             try {
-              static const MetricTagsMap timer_tags_map{
-                  {TAG_CATEGORY, TIMER_TAG_calculate_vector_rpc}};
-              auto timers = metrics::Metrics::getInstance()->buildTimers(
-                  SDK_MODULE_NAME, SYNC_TIME_CONSUMING, TIMER_BUCKET_SCALE, TIMER_MIN, TIMER_MAX, timer_tags_map);
-              metrics::Timer timer(timers.get());
               client->sync_calculateVector(rpc_options, calculate_vector_responses, calculate_vector_requests);
             } catch (predictor::CalculateVectorException& ex) {
               FB_LOG_EVERY_MS(ERROR, 2000) << ex.get_message();
@@ -395,6 +393,71 @@ bool PredictorClientSDK::calculate_vector(std::vector<CalculateVectorClientRespo
   }
   // pack response
   const std::vector<CalculateVectorResponse>& responses = calculate_vector_responses.get_resps();
+  std::stringstream req_ids;
+  if (responses.empty()) {
+    for (const auto& req : client_request_list) {
+      req_ids << req.req_id << " ";
+      markModelSyncRequestEmptyMetrics(req.model_name);
+      markChannelSyncRequestEmptyMetrics(req.channel);
+    }
+    markServiceSyncRequestEmptyMetrics(predictor_client_option.predictor_service_name, client_request_list.size());
+    FB_LOG_EVERY_MS(ERROR, 2000) << SDK_MODULE_NAME << " Got back empty responses. request ids: " << req_ids.str();
+  } else {
+    packCalculaterClientResponses(client_response_list, responses);
+  }
+
+  return true;
+}
+
+// calculate_batch_vector() interface (sync)
+bool PredictorClientSDK::calculate_batch_vector(std::vector<CalculateBatchVectorClientResponse>* client_response_list,
+                                 const std::vector<CalculateBatchVectorClientRequest>& client_request_list,
+                                 const PredictorClientOption &predictor_client_option) {
+  predictor::CalculateBatchVectorResponses batch_responses;
+  predictor::CalculateBatchVectorRequests batch_requests;
+
+  std::vector<predictor::CalculateBatchVectorRequest> request_list;
+  for (const auto& client_request : client_request_list) {
+    request_list.emplace_back(std::move(client_request.toCalculateBatchVectorRequest()));
+    markModelSyncRequestMetrics(client_request.model_name);
+    markChannelSyncRequestMetrics(client_request.channel);
+  }
+  markServiceSyncRequestMetrics(predictor_client_option.predictor_service_name, request_list.size());
+  batch_requests.set_reqs(std::move(request_list));
+
+  // client predict
+  int request_timeout = predictor_client_option.request_timeout;
+  service_router::ClientOption option = makeServiceRouterClientOption(predictor_client_option);
+  const bool rc = service_router::thriftServiceCall<predictor::PredictorServiceAsyncClient>(
+          option, [&batch_requests, &batch_responses, request_timeout](auto client) {
+            apache::thrift::RpcOptions rpc_options;
+            rpc_options.setTimeout(std::chrono::milliseconds(request_timeout));
+            // thriftServiceCall will catch all exceptions related to transport and connection, and everything else.
+            // Here we just want to catch logical error, add a log, and throw it again.
+            try {
+              client->sync_calculateBatchVector(rpc_options, batch_responses, batch_requests);
+            } catch (predictor::CalculateVectorException& ex) {
+              FB_LOG_EVERY_MS(ERROR, 2000) << ex.get_message();
+              throw ex;
+            }
+          });
+  if (!rc) {
+    std::stringstream req_ids;
+    for (const auto& req : client_request_list) {
+      req_ids << req.req_id << " ";
+    }
+    FB_LOG_EVERY_MS(ERROR, 2000) << SDK_MODULE_NAME
+      << " Failed calling predictor service (sync with option). request ids: " << req_ids.str();
+
+    for (const auto& client_request : client_request_list) {
+      markModelSyncRequestErrorMetrics(client_request.model_name);
+      markChannelSyncRequestErrorMetrics(client_request.channel);
+    }
+    markServiceSyncRequestErrorMetrics(predictor_client_option.predictor_service_name, client_request_list.size());
+    return false;
+  }
+  // pack response
+  const std::vector<CalculateBatchVectorResponse>& responses = batch_responses.get_resps();
   std::stringstream req_ids;
   if (responses.empty()) {
     for (const auto& req : client_request_list) {

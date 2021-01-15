@@ -87,6 +87,34 @@ std::vector<CalculateVectorResponse> CalculateVectorResponsesThriftFuture::get()
   return responses;
 }
 
+
+std::vector<CalculateBatchVectorResponse> CalculateBatchVectorResponsesThriftFuture::get() {
+  // blocks until the async call is done
+  predictor::CalculateBatchVectorResponses calculate_batch_vector_responses;
+  try {
+    calculate_batch_vector_responses = fut_ptr->get();
+  } catch (const std::exception& e) {
+    std::stringstream err_msg;
+    err_msg << typeid(e).name() << ":" << e.what();
+    LOG(ERROR) << SDK_MODULE_NAME
+               << " calculate_batch_vector fut_ptr->get() (thrift) caught exception: "
+               << err_msg.str();
+    markMeters(ASYNC_GET_EXCEPTION_METER, channel_model_names, service_name);
+    return {};
+  }
+  // pack response
+  const std::vector<CalculateBatchVectorResponse>& responses = calculate_batch_vector_responses.get_resps();
+  if (responses.empty()) {
+    LOG(ERROR)
+        << SDK_MODULE_NAME
+        << " calculate_batch_vector Got back empty responses (thrift). request ids: "
+        << req_ids;
+    markMeters(ASYNC_GET_EMPTY_RESP_METER, channel_model_names, service_name);
+    return {};
+  }
+  return responses;
+}
+
 namespace client_util {
 // make thrift feature from name and value
 feature_master::Feature makeFeature(const std::string& name, int64_t value) {
@@ -313,6 +341,49 @@ bool PredictorClientSDK::future_calculate_vector(
     markMeters(ASYNC_ERROR_METER, reqs, request_option.predictor_service_name);
     return false;
   }
+  return true;
+}
+
+
+bool PredictorClientSDK::future_calculate_batch_vector(
+    std::unique_ptr<CalculateBatchVectorResponsesThriftFuture>* batch_responses_future,
+    const CalculateBatchVectorRequests& batch_requests) {
+  const auto &reqs = batch_requests.get_reqs();
+  const auto& request_option = batch_requests.get_request_option();
+  markMeters(ASYNC_REQ_METER, reqs, request_option.predictor_service_name);
+
+  // client predict
+  service_router::ClientOption option = makeServiceRouterClientOption(request_option);
+  const bool rc = service_router::thriftServiceCall<
+          predictor::PredictorServiceAsyncClient>(
+          option,
+          [&batch_requests, &batch_responses_future,
+           &request_option, &reqs](auto client) {
+            apache::thrift::RpcOptions rpc_options;
+            rpc_options.setTimeout(std::chrono::milliseconds(request_option.request_timeout));
+            try {
+              auto fut_impl = std::make_unique<CalculateBatchVectorResponsesThriftFuture>();
+              fut_impl->fut_ptr = std::move(std::make_unique<folly::Future<predictor::CalculateBatchVectorResponses>>(
+                  client->future_calculateBatchVector(rpc_options, batch_requests)));
+              fut_impl->req_ids = getReqIds(reqs);
+              fut_impl->service_name = request_option.predictor_service_name;
+              for (const auto& batch_request : batch_requests.get_reqs()) {
+                fut_impl->channel_model_names.emplace_back(std::make_pair(batch_request.get_channel(),
+                                                                          batch_request.get_model_name()));
+              }
+              *batch_responses_future = std::move(fut_impl);
+            } catch (predictor::CalculateVectorException& ex) {
+              FB_LOG_EVERY_MS(ERROR, 2000) << ex.get_message();
+              throw ex;
+            }
+          });
+  if (!rc) {
+    LOG(ERROR) << "Failed calling predictor service calculateBatchVector (batch "
+                  "async thrift). request ids: " << getReqIds(reqs);
+    markMeters(ASYNC_ERROR_METER, reqs, request_option.predictor_service_name);
+    return false;
+  }
+
   return true;
 }
 }  //  namespace predictor

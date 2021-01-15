@@ -44,6 +44,20 @@ void monitorThreadTaskStats(folly::FutureExecutor<folly::CPUThreadPoolExecutor> 
   }
 }
 
+/*
+ * ONLY use this function when 'buf' can be parsed as a string
+ */
+std::string parseIOBuf(std::unique_ptr<folly::IOBuf> buf) {
+  const folly::IOBuf* p = buf.get();
+  std::string body;
+  do {
+    body.append(reinterpret_cast<const char*>(p->data()), p->length());
+    p = p->next();
+  } while (p != buf.get());
+
+  return body;
+}
+
 // service router的默认registry是consul，所以想通过ip+port的直连模式，需要显式调用一下这个函数
 void setDummyRegistry() {
   auto router = service_router::Router::getInstance();

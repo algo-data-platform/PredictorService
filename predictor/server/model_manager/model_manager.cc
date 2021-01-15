@@ -7,7 +7,7 @@
 #include "predictor/util/predictor_util.h"
 #include "predictor/util/predictor_util.h"
 #include "thirdparty/rapidjson/document.h"
-#include "predictor/server/resource_manager.h"
+#include "predictor/global_resource/resource_manager.h"
 #include <dirent.h>
 #include <fstream>
 #include <sstream>
@@ -373,6 +373,88 @@ bool ModelManager::setModelBusinessLine(const std::string &model_full_name, cons
     }
   });
   return true;
+}
+
+
+void ModelManager::calculateBatchVector(CalculateBatchVectorResponses* calculate_batch_vector_responses,
+                                std::unique_ptr<CalculateBatchVectorRequests> calculate_batch_vector_requests_ptr) {
+  std::vector<folly::Future<CalculateBatchVectorResponse> > fut_responses;
+
+  for (const auto &batch_request : calculate_batch_vector_requests_ptr->get_reqs()) {
+    // async calculate
+    fut_responses.emplace_back(cpu_thread_pool_->addFuture([this, &batch_request](){
+      return this->singleCalculateBatchVector(batch_request);
+    }));
+  }
+
+  std::vector<CalculateBatchVectorResponse> responses;
+  folly::collectAll(fut_responses)
+      .then([&responses](const std::vector<folly::Try<CalculateBatchVectorResponse>>& lists) {
+        for (auto& v : lists) {
+          if (v.hasException()) {
+            util::logAndMetricError("calculateBatchVector_unknown_error", v.value().get_req_id());
+          }
+          // clients should validate the response
+          responses.emplace_back(std::move(v.value()));
+        }
+      })
+      .get();
+
+  calculate_batch_vector_responses->set_resps(std::move(responses));
+  return;
+}
+
+
+CalculateBatchVectorResponse ModelManager::singleCalculateBatchVector(
+                             const CalculateBatchVectorRequest &batch_request) const {
+  const std::string &req_id = batch_request.get_req_id();
+  const std::string &model_full_name = batch_request.get_model_name();
+  CalculateBatchVectorResponse batch_response;
+  batch_response.req_id = req_id;  // set req id in response regardless
+  batch_response.set_return_code(RC_SUCCESS);
+
+  FB_LOG_EVERY_MS(INFO, 2000) << "model_full_name=" << model_full_name << ", req_id=" << req_id;
+  const int item_num = batch_request.get_features_map().size();
+  if (0 == item_num) {
+    FB_LOG_EVERY_MS(INFO, 2000) << "Got empty request for model = " << model_full_name
+                                << ", req_id=" << req_id;
+    return batch_response;
+  }
+
+  const auto factory = predictor::ModelFramework::getModelFramework(model_full_name, req_id);
+  if (!factory) {
+    util::logAndMetricError(model_full_name + "-invalid_framework", req_id);
+    batch_response.set_return_code(RC_ERROR);
+    return batch_response;
+  }
+
+  // metrics
+  {
+    // model-level num of ads
+    util::markHistogram(MODEL_NUM_COUNT, TAG_MODEL, model_full_name, item_num);
+    // channel-level num of ads
+    util::markHistogram(CHANNEL_NUM_COUNT, TAG_CHANNEL,
+                        batch_request.channel.empty() ? DEFAULT_CHANNEL_NAME : batch_request.channel,
+                        item_num);
+    // item-level qps
+    const MetricTagsMap item_tags_map{{TAG_MODEL, model_full_name}};
+    util::markMeter(ITEM_CONSUMING, item_tags_map, item_num);
+  }
+
+  std::shared_ptr<predictor::ModelFramework> framework = factory->body;
+  if (!framework->calculateBatchVector(&batch_response, batch_request, model_full_name)) {
+    util::logAndMetricError(model_full_name + "-calculate_batch_vector_error", req_id);
+    batch_response.set_return_code(RC_ERROR);
+    return batch_response;
+  }
+
+  const int vector_map_size = batch_response.get_vector_map().size();
+  if (vector_map_size != item_num) {
+    util::logAndMetricError(model_full_name + "-missing_response", req_id);
+    batch_response.set_return_code(RC_ERROR);
+  }
+
+  return batch_response;
 }
 
 }  // namespace predictor

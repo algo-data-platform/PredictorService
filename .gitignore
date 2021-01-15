@@ -21,6 +21,7 @@ thirdparty/krb5/lib64_release/
 thirdparty/krb5/lib64_debug
 thirdparty/krb5/include/
 thirdparty/tensorflow/lib64_debug
+thirdparty/tensorflow/lib64_release/libtensorflow_cc*
 thirdparty/catboost/lib64_debug
 thirdparty/jemalloc/lib64_release
 thirdparty/jemalloc/lib64_debug

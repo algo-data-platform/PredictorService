@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 #include "folly/executors/IOThreadPoolExecutor.h"
-#include "predictor/server/predictor_service.h"
+#include "predictor/server/predictor_service/predictor_service.h"
 #include "service_router/http.h"
 #include "proxygen/lib/http/HTTPMessage.h"
 #include "proxygen/httpserver/ResponseBuilder.h"
@@ -20,10 +20,10 @@ class HttpService {
   HttpService(HttpService&&) = delete;
   HttpService& operator=(const HttpService&) = delete;
   HttpService& operator=(HttpService&&) = delete;
-  explicit HttpService(std::shared_ptr<predictor::PredictorService> predictor_service);
+  explicit HttpService(std::shared_ptr<ModelManager> model_manager);
   ~HttpService();
 
-  void start(const std::string& host, uint16_t port);
+  bool start(const std::string& host, uint16_t port);
   void stop();
   void unregisterAll();
 
@@ -85,8 +85,7 @@ class HttpService {
 
  private:
   std::shared_ptr<folly::CPUThreadPoolExecutor> http_cpu_thread_pool_;
-
-  std::shared_ptr<predictor::PredictorService> predictor_service_;
+  std::shared_ptr<ModelManager> model_manager_;
   std::shared_ptr<std::thread> http_server_thread_;
   std::shared_ptr<proxygen::HTTPServer> http_server_;
 
