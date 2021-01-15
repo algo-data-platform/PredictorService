@@ -6,11 +6,13 @@
 #include "tensorflow/core/protobuf/tensor_bundle.pb.h"
 #include "tensorflow/cc/saved_model/loader.h"
 #include "common/util.h"
-
 #include "predictor/util/predictor_constants.h"
-#include "predictor/util/predictor_util.h"
 
 namespace predictor {
+
+typedef std::map<std::string, std::vector<double>> VectorMapType;
+typedef std::map<int64_t, VectorMapType> BatchVectorMapType;
+
 class TFModel : public Model {
  public:
   virtual ~TFModel() = default;
@@ -66,36 +68,67 @@ class TFModel : public Model {
     return true;
   }
 
-  bool constructVectorResponseFromTFOutputs(CalculateVectorResponse* calculate_vector_response,
-                                            const std::vector<std::string>& output_names,
-                                            const std::vector<tensorflow::Tensor>& outputs) {
-    std::map<std::string, std::vector<double>> vector_map;
+  bool constructVectorMap(VectorMapType *vector_map,
+                          int64_t item_idx,
+                          const std::vector<std::string>& output_names,
+                          size_t expect_output_size,
+                          const std::vector<tensorflow::Tensor>& outputs) {
     for (size_t i = 0; i < outputs.size(); ++i) {
       if (2 != outputs[i].shape().dims()) {
-        FB_LOG_EVERY_MS(ERROR, 2000) << "wrong dims of tensor, which is " << outputs[0].shape().dims();
+        FB_LOG_EVERY_MS(ERROR, 2000) << "wrong dims of tensor, which is " << outputs[i].shape().dims();
         return false;
       }
+
       size_t output_size = outputs[i].shape().dim_size(0);
       size_t vector_len = outputs[i].shape().dim_size(1);
-      if (1 != output_size) {
-        FB_LOG_EVERY_MS(ERROR, 2000) << "input size and output size don't match. input size = " << 1
-                                     << ", output size = " << output_size;
-        return false;
+      if (expect_output_size != output_size) {
+          FB_LOG_EVERY_MS(ERROR, 2000) << "input size and output size don't match. input size = " << expect_output_size
+                                      << ", output size = " << output_size;
+          return false;
       }
       auto tmap = outputs[i].tensor<float, 2>();
       std::vector<double> v;
       for (size_t j = 0; j < vector_len; ++j) {
-        v.emplace_back(tmap(0, j));
+        v.emplace_back(tmap(item_idx, j));
       }
-
-      vector_map[output_names[i]] = std::move(v);
+      vector_map->emplace(output_names[i], std::move(v));
     }
-    calculate_vector_response->set_vector_map(std::move(vector_map));
+
     return true;
   }
 
-  template <class T>
-  bool tfCalculateVector(CalculateVectorResponse* calculate_vector_response,
+  bool constructVectorResponseFromTFOutputs(CalculateVectorResponse* response,
+                                            const std::vector<int64_t> item_vec,
+                                            const std::vector<std::string>& output_names,
+                                            const std::vector<tensorflow::Tensor>& outputs) {
+    VectorMapType vector_map;
+    if (!constructVectorMap(&vector_map, 0, output_names, 1, outputs)) {
+      return false;
+    }
+
+    response->set_vector_map(std::move(vector_map));
+    return true;
+  }
+
+  bool constructVectorResponseFromTFOutputs(CalculateBatchVectorResponse* response,
+                                            const std::vector<int64_t> item_vec,
+                                            const std::vector<std::string>& output_names,
+                                            const std::vector<tensorflow::Tensor>& outputs) {
+    BatchVectorMapType batch_vector_map;
+    for (size_t i = 0; i < item_vec.size(); ++i) {
+      VectorMapType vector_map;
+      if (!constructVectorMap(&vector_map, i, output_names, item_vec.size(), outputs)) {
+        return false;
+      }
+      batch_vector_map.emplace(item_vec[i], std::move(vector_map));
+    }
+
+    response->set_vector_map(std::move(batch_vector_map));
+    return true;
+  }
+
+  template <class T, class ResponseType>
+  bool tfCalculateVector(ResponseType* calculate_vector_response,
                          const std::vector<std::pair<int64_t, T>>& examples,
                          const std::vector<std::string>& output_names) {
     const MetricTagsMap model_tag_map{{TAG_MODEL, model_full_name_}, {TAG_BUSINESS_LINE, business_line_}};
@@ -122,8 +155,16 @@ class TFModel : public Model {
         return false;
       }
     }
+
+    std::vector<int64_t> item_vec;
+    item_vec.reserve(examples.size());
+    for (const auto &kv : examples) {
+      item_vec.push_back(kv.first);
+    }
+
     // populate response
-    return constructVectorResponseFromTFOutputs(calculate_vector_response, output_names, outputs);
+    return constructVectorResponseFromTFOutputs(calculate_vector_response,
+                                                item_vec, output_names, outputs);
   }
 
   virtual bool tfCalculateOutputs(

@@ -64,13 +64,30 @@ std::shared_ptr<Meter> Metrics::getOneMeter(
   return meters_->getOne(module_name, metric_name, tags);
 }
 
-std::shared_ptr<Histograms> Metrics::buildHistograms(const std::string& module_name, const std::string& metric_name,
-                                                     double bucket_size, double min, double max, MetricTags tags,
-                                                     const std::vector<int>& time_level_sec) {
-  return histograms_->build(
-      module_name, metric_name, tags, [this, module_name, metric_name, bucket_size, min, max, &time_level_sec]() {
-        return std::make_shared<Histograms>(module_name, metric_name, bucket_size, min, max, evb_, time_level_sec);
-      });
+std::shared_ptr<Counter> Metrics::getOneCounter(
+  const std::string& module_name, const std::string& metric_name,
+  MetricTags tags) {
+  return counters_->getOne(module_name, metric_name, tags);
+}
+
+bool Metrics::eraseOneCounter(
+  const std::string& module_name, const std::string& metric_name,
+  MetricTags tags) {
+  return counters_->eraseOne(module_name, metric_name, tags);
+}
+
+std::shared_ptr<Histograms> Metrics::buildHistograms(
+    const std::string& module_name, const std::string& metric_name,
+    double bucket_size, double min, double max, MetricTags tags,
+    const std::vector<int>& time_level_sec,
+    const std::vector<double>& percentiles) {
+  return histograms_->build(module_name, metric_name, tags,
+                            [this, module_name, metric_name, bucket_size, min,
+                             max, &time_level_sec, &percentiles]() {
+    return std::make_shared<Histograms>(module_name, metric_name, bucket_size,
+                                        min, max, evb_, time_level_sec,
+                                        percentiles);
+  });
 }
 
 const std::unordered_map<uint64_t, std::shared_ptr<Histograms>> Metrics::getHistograms() {
@@ -80,12 +97,14 @@ const std::unordered_map<uint64_t, std::shared_ptr<Histograms>> Metrics::getHist
 std::shared_ptr<Timers> Metrics::buildTimers(const std::string& module_name, const std::string& metric_name,
                                              double bucket_size, double min, double max, MetricTags tags,
                                              const std::vector<int>& time_level_his_sec,
-                                             const std::vector<int>& time_level_meter_min) {
+                                             const std::vector<int>& time_level_meter_min,
+                                             const std::vector<double>& percentiles) {
   return timers_->build(
       module_name, metric_name, tags,
-      [this, module_name, metric_name, bucket_size, min, max, &time_level_his_sec, &time_level_meter_min]() {
+      [this, module_name, metric_name, bucket_size, min, max,
+       &time_level_his_sec, &time_level_meter_min, &percentiles]() {
         return std::make_shared<Timers>(module_name, metric_name, bucket_size, min, max, evb_, time_level_his_sec,
-                                        time_level_meter_min);
+                                        time_level_meter_min, percentiles);
       });
 }
 
@@ -263,8 +282,9 @@ StatsClock::time_point mkTimePoint() { return std::chrono::steady_clock::now(); 
 constexpr static int TIME_LEVEL_ALL_TIME = 0;
 
 Histograms::Histograms(const std::string module_name, const std::string metric_name, double bucket_size, double min,
-                       double max, folly::EventBase* evb, const std::vector<int>& time_level_sec)
-    : MetricBase(module_name, metric_name, evb), time_level_sec_(time_level_sec) {
+                       double max, folly::EventBase* evb, const std::vector<int>& time_level_sec,
+                       const std::vector<double>& percentiles)
+    : MetricBase(module_name, metric_name, evb), time_level_sec_(time_level_sec), percentiles_(percentiles) {
   // seconds(0) 代表所有时间段聚合的直方图
   // 并且必须放到数组最后面
   auto has_one_zero = std::find(time_level_sec_.begin(), time_level_sec_.end(), TIME_LEVEL_ALL_TIME);
@@ -312,9 +332,10 @@ double Histograms::getCount(int level) {
 
 Timers::Timers(const std::string module_name, const std::string metric_name, double bucket_size, double min, double max,
                folly::EventBase* evb, const std::vector<int>& time_level_his_sec,
-               const std::vector<int>& time_level_meter_min)
+               const std::vector<int>& time_level_meter_min, const std::vector<double>& percentiles)
     : MetricBase(module_name, metric_name, evb) {
-  histograms_ = std::make_shared<Histograms>(module_name, metric_name, bucket_size, min, max, evb, time_level_his_sec);
+  histograms_ = std::make_shared<Histograms>(module_name, metric_name, bucket_size, min, max, evb, time_level_his_sec,
+                                             percentiles);
   meter_ = std::make_shared<Meter>(module_name, metric_name, evb, time_level_meter_min);
   meter_->init();
 }

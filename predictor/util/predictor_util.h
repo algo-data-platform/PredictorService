@@ -5,6 +5,7 @@
 #include "folly/GLog.h"
 #include "folly/executors/CPUThreadPoolExecutor.h"
 #include "folly/executors/FutureExecutor.h"
+#include "folly/io/IOBuf.h"
 #include <memory>
 
 namespace predictor {
@@ -15,6 +16,12 @@ namespace util {
 static metrics::Timers* buildTimers(const std::string &metric_name, const MetricTagsMap &tags_map) {
   return metrics::Metrics::getInstance()->buildTimers(
     SERVER_NAME, metric_name, TIMER_BUCKET_SCALE, TIMER_MIN, TIMER_MAX, tags_map).get();
+}
+static void markMeter(const std::string &metric_name, const MetricTagsMap &tags_map) {
+  metrics::Metrics::getInstance()->buildMeter(SERVER_NAME, metric_name, tags_map, MINUTES)->mark();
+}
+static void markMeter(const std::string &metric_name, const MetricTagsMap &tags_map, double num) {
+  metrics::Metrics::getInstance()->buildMeter(SERVER_NAME, metric_name, tags_map, MINUTES)->mark(num);
 }
 static void markHistogram(const std::string &metric_name, const std::string &tag_key,
                           const std::string &tag_value, const double &num) {
@@ -39,5 +46,20 @@ inline double restoreFromNegativeSampling(double origin, double negative_samplin
 }
 inline double sigmoid(double output) { return 1.0 / (1.0 + std::exp(-output)); }
 void setDummyRegistry();
+static std::string getModelFrameworkName(const std::string& model_full_name) {
+  std::vector<std::string> tmp;
+  folly::split('_', model_full_name, tmp);
+  if (tmp.size() < 3) {
+    logAndMetricError(model_full_name + "-invalid_model_name");
+    return "";
+  }
+  return tmp[0];
+}
+
+/*
+ * ONLY use this function when 'buf' can be parsed as a string
+ */
+std::string parseIOBuf(std::unique_ptr<folly::IOBuf> buf);
+
 }  // namespace util
 }  // namespace predictor

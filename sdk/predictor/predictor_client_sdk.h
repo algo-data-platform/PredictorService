@@ -36,9 +36,14 @@ class CalculateVectorRequest;
 class CalculateVectorRequests;
 class CalculateVectorResponse;
 class CalculateVectorResponses;
+class CalculateBatchVectorRequest;
+class CalculateBatchVectorRequests;
+class CalculateBatchVectorResponse;
+class CalculateBatchVectorResponses;
 class PredictResponsesThriftFuture;
 class MultiPredictResponseFuture;
 class CalculateVectorResponsesThriftFuture;
+class CalculateBatchVectorResponsesThriftFuture;
 //
 // non-thrift structs
 //
@@ -47,7 +52,8 @@ class PredictClientResponse;
 class PredictResponsesFuture;
 class CalculateVectorClientRequest;
 class CalculateVectorClientResponse;
-class CalculateVectorResponsesThriftFuture;
+class CalculateBatchVectorClientRequest;
+class CalculateBatchVectorClientResponse;
 }  // namespace predictor
 namespace service_router {
 class ServerList;
@@ -128,6 +134,9 @@ class PredictorClientSDK {
     std::unique_ptr<CalculateVectorResponsesThriftFuture>* calculate_vector_responses_future,
     const CalculateVectorRequests& calculate_vector_requests);
 
+  static bool future_calculate_batch_vector(
+  std::unique_ptr<CalculateBatchVectorResponsesThriftFuture>* batch_responses_future,
+  const CalculateBatchVectorRequests& batch_requests);
   //
   // non-thrift interfaces
   //
@@ -140,7 +149,9 @@ class PredictorClientSDK {
   static bool calculate_vector(std::vector<CalculateVectorClientResponse>* client_response_list,
                             const std::vector<CalculateVectorClientRequest>& calculate_vector_client_requests,
                             const PredictorClientOption &predictor_client_option = PredictorClientOption());
-
+  static bool calculate_batch_vector(std::vector<CalculateBatchVectorClientResponse>* client_response_list,
+                                const std::vector<CalculateBatchVectorClientRequest>& client_requests,
+                                const PredictorClientOption &predictor_client_option = PredictorClientOption());
   //
   // data members
   //
@@ -190,6 +201,14 @@ struct CalculateVectorResponsesThriftFuture {
   std::vector<std::pair<std::string, std::string>> channel_model_names;
   std::string service_name;
   std::vector<CalculateVectorResponse> get();
+};
+
+struct CalculateBatchVectorResponsesThriftFuture {
+  std::unique_ptr<folly::Future<predictor::CalculateBatchVectorResponses>> fut_ptr;
+  std::string req_ids;
+  std::vector<std::pair<std::string, std::string>> channel_model_names;
+  std::string service_name;
+  std::vector<CalculateBatchVectorResponse> get();
 };
 //
 // feature making utilities for thrift client
@@ -272,6 +291,22 @@ struct CalculateVectorClientResponse {
   std::string req_id;
   std::string model_timestamp;
   std::map<std::string, std::vector<double>> vector_map;
+  int32_t return_code;
+};
+
+struct CalculateBatchVectorClientRequest {
+  std::string req_id;
+  std::string channel;
+  std::string model_name;
+  std::map<int64_t, std::vector<PredictFeature>> feature_map;
+  std::vector<std::string> output_names;
+
+  CalculateBatchVectorRequest toCalculateBatchVectorRequest() const;
+};
+struct CalculateBatchVectorClientResponse {
+  std::string req_id;
+  std::string model_timestamp;
+  std::map<int64_t, std::map<std::string, std::vector<double>>> vector_map;
   int32_t return_code;
 };
 

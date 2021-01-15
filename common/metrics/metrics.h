@@ -157,19 +157,22 @@ class Histograms : public MetricBase {
  public:
   Histograms() = default;
   Histograms(const std::string module_name, const std::string metric_name, double bucket_size, double min, double max,
-             folly::EventBase* evb, const std::vector<int>& time_level_sec);
+             folly::EventBase* evb, const std::vector<int>& time_level_sec,
+             const std::vector<double>& percentiles = {0.999, 0.99, 0.98, 0.95, 0.75, 0.5});
   void update();
   void addValue(double val);
   double getPercentileEstimate(double pct, int level);
   double getAvg(int level);
   double getCount(int level);
   const std::vector<int> getTimeLevels() { return time_level_sec_; }
+  const std::vector<double> getPercents() { return percentiles_; }
   ~Histograms() = default;
 
  private:
   folly::SpinLock spinlock_;
   std::shared_ptr<folly::TimeseriesHistogram<double, std::chrono::steady_clock>> time_histogram_;
   std::vector<int> time_level_sec_;
+  std::vector<double> percentiles_;
 };
 
 class Timers : public MetricBase {
@@ -177,7 +180,8 @@ class Timers : public MetricBase {
   Timers() = default;
   Timers(const std::string module_name, const std::string metric_name, double bucket_size, double min, double max,
          folly::EventBase* evb, const std::vector<int>& time_level_his_sec,
-         const std::vector<int>& time_level_meter_min);
+         const std::vector<int>& time_level_meter_min,
+         const std::vector<double>& percentiles = {0.999, 0.99, 0.98, 0.95,  0.75, 0.5});
   void update(double time);
   std::shared_ptr<Histograms> getHistograms() { return histograms_; }
   std::shared_ptr<Meter> getMeter() { return meter_; }
@@ -243,6 +247,18 @@ class MetricStore {
     });
   }
 
+  bool eraseOne(const std::string& module_name, const std::string& metric_name, MetricTags tags) {
+    uint64_t key = metricHash(module_name, metric_name, tags);
+    return metrics_.withULockPtr([key](auto ulock) {
+      if (ulock->find(key) == ulock->end()) {
+        return false;
+      }
+      auto wlock = ulock.moveFromUpgradeToWrite();
+      wlock->erase(key);
+      return true;
+    });
+  }
+
   uint64 metricHash(const std::string& module_name, const std::string& metric_name, MetricTags tags) {
     uint64_t key = CityHash64WithSeed(module_name.c_str(), module_name.size(), 0);
     key = CityHash64WithSeed(metric_name.c_str(), metric_name.size(), key);
@@ -279,13 +295,18 @@ class Metrics {
                                         MetricTags tags = folly::none, int precision = 0);
   std::shared_ptr<Meter> buildMeter(const std::string& module_name, const std::string& metric_name,
                                     MetricTags tags = folly::none, const std::vector<int>& time_level_min = {1, 5, 15});
-  std::shared_ptr<Histograms> buildHistograms(const std::string& module_name, const std::string& metric_name,
-                                              double bucket_size, double min, double max, MetricTags tags = folly::none,
-                                              const std::vector<int>& time_level_sec = {3600, 60});
+  std::shared_ptr<Histograms> buildHistograms(
+    const std::string& module_name, const std::string& metric_name,
+    double bucket_size, double min, double max, MetricTags tags = folly::none,
+    const std::vector<int>& time_level_sec = {3600, 60},
+    const std::vector<double>& percentiles = {0.999, 0.99, 0.98,
+                                              0.95,  0.75, 0.5});
+
   std::shared_ptr<Timers> buildTimers(const std::string& module_name, const std::string& metric_name,
                                       double bucket_size, double min, double max, MetricTags tags = folly::none,
                                       const std::vector<int>& time_level_his_sec = {3600, 60},
-                                      const std::vector<int>& time_level_meter_min = {1, 5, 15});
+                                      const std::vector<int>& time_level_meter_min = {1, 5, 15},
+                                      const std::vector<double>& percentiles = {0.999, 0.99, 0.98, 0.95,  0.75, 0.5});
 
   const std::unordered_map<uint64_t, std::shared_ptr<Gauges>> getGauges();
   const std::unordered_map<uint64_t, std::shared_ptr<BatchGauges>> getBatchGauges();
@@ -297,6 +318,10 @@ class Metrics {
   std::shared_ptr<Timers> getOneTimer(const std::string& module_name, const std::string& metric_name,
                                       MetricTags tags);
   std::shared_ptr<Meter> getOneMeter(const std::string& module_name, const std::string& metric_name,
+                                     MetricTags tags);
+  std::shared_ptr<Counter> getOneCounter(const std::string& module_name, const std::string& metric_name,
+                                     MetricTags tags);
+  bool eraseOneCounter(const std::string& module_name, const std::string& metric_name,
                                      MetricTags tags);
 
   void stop() {

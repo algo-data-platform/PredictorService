@@ -16,8 +16,8 @@ struct RequestOption {
 
 struct PredictRequest {
   1: required string req_id
-  2: required string channel  # hot-feed , banner , etc 
-  3: required string model_name 
+  2: required string channel  # hot-feed , banner , etc
+  3: required string model_name
   4: required map<i64, feature_master.Features> item_features // per item features
   5: required feature_master.Features common_features  // user or context features to be shared
   6: optional map<string, string> context    // additional context
@@ -35,7 +35,7 @@ struct PredictRequests {
 }
 
 struct PredictResponses {
-  1: required list<PredictResponse> resps 
+  1: required list<PredictResponse> resps
 }
 
 struct MultiPredictRequest {
@@ -58,8 +58,8 @@ exception PredictException {
 
 struct CalculateVectorRequest {
   1: required string req_id
-  2: required string channel  # hot-feed , banner , etc 
-  3: required string model_name 
+  2: required string channel  # hot-feed , banner , etc
+  3: required string model_name
   4: required feature_master.Features features
   5: required list<string> output_names
 }
@@ -78,15 +78,42 @@ struct CalculateVectorRequests {
 }
 
 struct CalculateVectorResponses {
-  1: required list<CalculateVectorResponse> resps 
+  1: required list<CalculateVectorResponse> resps
 }
 
 exception CalculateVectorException {
   1: string message
 }
 
+struct CalculateBatchVectorRequest {
+  1: required string req_id
+  2: required string channel  # hot-feed , banner , etc
+  3: required string model_name
+  4: required map<i64, feature_master.Features> features_map  # adid -> features
+  5: required list<string> output_names
+  6: optional map<string, string> context    # additional context
+}
+
+struct CalculateBatchVectorResponse {
+  1: required string req_id
+  2: required string model_timestamp
+  3: required map<i64, map<string, list<double>>> vector_map # adid -> (output name -> vector)
+  4: optional i32 return_code
+}
+
+struct CalculateBatchVectorRequests {
+  1: required list<CalculateBatchVectorRequest> reqs
+  2: required RequestOption request_option   # option use by service_router and thrift
+  3: optional map<string, string> context    # additional context
+}
+
+struct CalculateBatchVectorResponses {
+  1: required list<CalculateBatchVectorResponse> resps
+}
+
 service PredictorService {
   PredictResponses predict(1: PredictRequests reqs) throws (1: PredictException e)
   MultiPredictResponse multiPredict(1: MultiPredictRequest multi_req) throws (1: PredictException e)
   CalculateVectorResponses calculateVector(1: CalculateVectorRequests reqs) throws (1: CalculateVectorException e)
+  CalculateBatchVectorResponses calculateBatchVector(1: CalculateBatchVectorRequests reqs) throws (1: CalculateVectorException e)
 }
