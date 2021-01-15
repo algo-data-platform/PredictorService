@@ -8,9 +8,9 @@
 #include "service_router/thrift.h"
 
 #include "predictor/util/predictor_util.h"
-#include "predictor/server/predictor_service.h"
+#include "predictor/server/predictor_service/predictor_service.h"
 #include "predictor/server/http_service/http_service.h"
-#include "predictor/server/resource_manager.h"
+#include "predictor/global_resource/resource_manager.h"
 
 DEFINE_int32(port, 0, "predictor server port");
 DEFINE_int32(http_port, 0, "predictor http server port");
@@ -30,7 +30,8 @@ DEFINE_int32(use_model_service, 0, "whether to use model service");
 DEFINE_int32(http_cpu_thread_num, 0, "size of http cpu thread pool");
 DEFINE_int32(use_dynamic_unregister_service, 0, "use dynamical unregister service and unload model config");
 DEFINE_int32(sleep_seconds_before_shutdown, 3, "how many seconds the process sleeps for before shutdown");
-
+DEFINE_int32(thrift_io_thread_amplification_factor, 1, "amplification factor of thrift io thread number");
+DEFINE_int32(start_thrift_server, 1, "start thrift server flag");
 namespace {
 
 constexpr char LOG_CATEGORY[] = "predictor_server.cc";
@@ -41,6 +42,11 @@ constexpr unsigned DEFAULT_SERVER_WEIGHT = 16;
 std::function<void(int)> shutdown_handler;
 void signal_handler(int signal) { shutdown_handler(signal); }
 
+void cerr_and_flush_log(const std::string &component) {
+  std::cerr << "Failed to init " << component << "! Exiting..." << std::endl;
+  google::FlushLogFiles(google::INFO);
+  google::FlushLogFiles(google::ERROR);
+}
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -48,15 +54,22 @@ int main(int argc, char** argv) {
   folly::init(&argc, &argv);
 
   LOG(INFO) << "predictor server started!";
-  // init PredictorService and load model
-  auto predictor_service = std::make_shared<predictor::PredictorService>();
-  if (!predictor_service->init(FLAGS_model_path)) {
-    // log_err...
-    std::cerr << "Failed to init model file!" << std::endl;
-    google::FlushLogFiles(google::INFO);
-    google::FlushLogFiles(google::ERROR);
+  // hardware cpu core num, get once on start
+  predictor::ResourceMgr::initCoreNum();
+
+  // init model_manager
+  auto model_manager = std::make_shared<predictor::ModelManager>();
+  if (!model_manager->init(FLAGS_model_path)) {
+    cerr_and_flush_log("model_manager");
     return -1;
   }
+  // init predictor_service
+  auto predictor_service = std::make_shared<predictor::PredictorService>(model_manager);
+  if (!predictor_service->init()) {
+    cerr_and_flush_log("predictor_service");
+    return -1;
+  }
+
   if (FLAGS_host == "") {
     std::string local_ip{""};
     common::getLocalIpAddress(&local_ip);
@@ -69,8 +82,11 @@ int main(int argc, char** argv) {
 
   predictor::util::setDummyRegistry();
   // start http server
-  auto http_service = std::make_shared<predictor::HttpService>(predictor_service);
-  http_service->start(FLAGS_host, FLAGS_http_port);
+  auto http_service = std::make_shared<predictor::HttpService>(model_manager);
+  if (!http_service->start(FLAGS_host, FLAGS_http_port)) {
+    cerr_and_flush_log("http_service");
+    return -1;
+  }
 
   if (FLAGS_use_model_service) {
     shutdown_handler = [http_service](int signum) {
@@ -105,22 +121,25 @@ int main(int argc, char** argv) {
     service_router::ServerOption option;
     option.setServiceName(FLAGS_service_name);
     option.setServerAddress(address);
-    service_router::ThriftServer thrift_server;
-    thrift_server.init<predictor::PredictorService>(option, predictor_service);
-    thrift_server.startServe(true);
-  } else {
-    // get server weight
-    // If the local ip exist in the server weight config, we will set the server weight based on the config.
-    // Otherwise, we set the weight based on the cpu core number.
-    int server_weight = DEFAULT_SERVER_WEIGHT;
-    unsigned core_num = std::thread::hardware_concurrency();
-    if (core_num <= 0) {
-      LOG(ERROR) << "failed to get hardware_concurrency";
-    } else {
-      server_weight = core_num;
+    while (FLAGS_start_thrift_server) {
+      FLAGS_start_thrift_server = 0;
+      LOG(INFO) << "create thrift server";
+      predictor::ResourceMgr::createNewThriftServer();
+      LOG(INFO) << "init thrift server";
+      predictor::ResourceMgr::getThriftServer()->init<predictor::PredictorService>(option, predictor_service);
+      LOG(INFO) << "ResourceMgr::getThriftServer()->configMutable():"
+                << predictor::ResourceMgr::getThriftServer()->configMutable();
+      LOG(INFO) << "set thrift server io thread number";
+      predictor::ResourceMgr::getThriftServer()->setNumIOWorkerThreads(
+        predictor::ResourceMgr::core_num_ * FLAGS_thrift_io_thread_amplification_factor);
+      LOG(INFO) << "thrift_server.getNumIOWorkerThreads():"
+                << predictor::ResourceMgr::getThriftServer()->getNumIOWorkerThreads();
+      LOG(INFO) << "start thrift server";
+      predictor::ResourceMgr::getThriftServer()->startServe(true);
     }
+  } else {
+    int server_weight = predictor::ResourceMgr::core_num_;
     LOG(INFO) << "server weight is " << server_weight;
-
     // start thrift service and register service names in one go
     auto exitSignalHandler = [](int signum) {
       LOG(INFO) << "signum=" << signum << ", unregistering thrift server";

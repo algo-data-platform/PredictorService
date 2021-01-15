@@ -29,13 +29,8 @@ namespace predictor {
     model->business_line_ = business_line;
 
     try {
-      models_.withULockPtr([&full_name, model](auto ulock) {
-        if (ulock->find(full_name) == ulock->end()) {
-          auto wlock = ulock.moveFromUpgradeToWrite();
-          (*wlock)[full_name].store(model);
-        } else {
-          ulock->at(full_name).store(model);
-        }
+      models_.withWLock([&full_name, model](auto& wlock) {
+        wlock[full_name] = model;
       });
     }
     catch (std::exception e) {
@@ -53,7 +48,7 @@ namespace predictor {
     models_.withRLock([&model_full_name, &model_ptr](auto& rlock) {
       auto iter = rlock.find(model_full_name);
       if (iter != rlock.end()) {
-        model_ptr = iter->second.load();
+        model_ptr = iter->second;
       }
     });
 
@@ -92,6 +87,43 @@ namespace predictor {
     std::string& framework_name = splitted_name[0];
     const auto& factory = common::FactoryRegistry<ModelFrameworkFactory>::Find(framework_name);
     return factory;
+  }
+
+  bool ModelFramework::calculateBatchVector(CalculateBatchVectorResponse* batch_response,
+                                            const CalculateBatchVectorRequest& batch_request,
+                                            const std::string& model_full_name) const {
+    // get model
+    std::shared_ptr<predictor::Model> model_ptr = nullptr;
+    models_.withRLock([&model_full_name, &model_ptr](auto& rlock) {
+      auto iter = rlock.find(model_full_name);
+      if (iter != rlock.end()) {
+        model_ptr = iter->second;
+      }
+    });
+
+    if (model_ptr == nullptr) {
+      // log error
+      FB_LOG_EVERY_MS(ERROR, 2000) << "Invalid model_full_name=" << model_full_name;
+      return false;
+    }
+
+    // per model time consuming
+    const MetricTagsMap model_tag_map {
+      {TAG_MODEL, model_ptr->model_full_name_},
+      {TAG_BUSINESS_LINE, model_ptr->business_line_}
+    };
+    metrics::Timer model_timer(util::buildTimers(MODEL_CONSUMING, model_tag_map));
+    // per channel time consuming
+    const MetricTagsMap channel_tag_map {
+      {TAG_CHANNEL, batch_request.channel.empty() ? DEFAULT_CHANNEL_NAME : batch_request.channel},
+      {TAG_BUSINESS_LINE, model_ptr->business_line_}
+    };
+    metrics::Timer channel_timer(util::buildTimers(CHANNEL_TIME_CONSUMING, channel_tag_map));
+    if (!model_ptr->calculateBatchVector(batch_response, batch_request)) {
+      return false;
+    }
+
+    return true;
   }
 }  // namespace predictor
 

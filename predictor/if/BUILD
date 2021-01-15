@@ -9,3 +9,16 @@ fbthrift_library(
 		'//thirdparty/fbthrift:thrift1',
 	]
 )
+
+fbthrift_library(
+  name="config",
+  srcs=[
+    'predictor_config.thrift',
+  ],
+  options='reflection',
+  include_prefix='predictor/if',
+	deps=[
+		'//thirdparty/fbthrift:thrift1',
+    '//thirdparty/fbthrift:thriftprotocol',
+	]
+)

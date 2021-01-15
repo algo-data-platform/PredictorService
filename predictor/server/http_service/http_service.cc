@@ -10,7 +10,7 @@
 #include "service_router/thrift.h"
 #include "service_router/router.h"
 #include "predictor/util/predictor_constants.h"
-#include "predictor/server/resource_manager.h"
+#include "predictor/global_resource/resource_manager.h"
 #include "predictor/util/predictor_util.h"
 
 DEFINE_string(predictor_service_name, "predictor_service_dev", "predictor service name");
@@ -41,54 +41,35 @@ namespace {
 constexpr char LOG_CATEGORY[] = "http_service.cc";
 constexpr unsigned DEFAULT_SERVER_WEIGHT = 16;
 
-/*
- * This is not a generic case, use this function
- * only if you know the buffer you are parsing
- * is a string
- */
-std::string parseIOBuf(std::unique_ptr<folly::IOBuf> buf) {
-  const folly::IOBuf* p = buf.get();
-  std::string body;
-  do {
-    body.append(reinterpret_cast<const char*>(p->data()), p->length());
-    p = p->next();
-  } while (p != buf.get());
-
-  return body;
-}
-
 }  // namespace
 
 constexpr char FILE_PARAM[] = "file";
 
-HttpService::HttpService(std::shared_ptr<predictor::PredictorService> predictor_service)
-    : predictor_service_(predictor_service) {
+HttpService::HttpService(std::shared_ptr<ModelManager> model_manager)
+    : model_manager_(model_manager) {
   auto configs_locked = configs_.wlock();
   *configs_locked = folly::dynamic::object;
 }
 
-void HttpService::start(const std::string& host, uint16_t port) {
+bool HttpService::start(const std::string& host, uint16_t port) {
+  if (!model_manager_) {
+    util::logAndMetricError("model_manager_not_initialized");
+    return false;
+  }
+
   // init http cpu thread pool executors
+  const auto core_num = ResourceMgr::core_num_;
   if (FLAGS_http_cpu_thread_num == 0) {
-    auto core_num = std::thread::hardware_concurrency();
-    FLAGS_http_cpu_thread_num = core_num > 0 ? core_num : 8;
+    FLAGS_http_cpu_thread_num = core_num;
   }
   http_cpu_thread_pool_ = std::make_shared<folly::CPUThreadPoolExecutor>(
     std::make_pair(FLAGS_http_cpu_thread_num, FLAGS_http_cpu_thread_num),  // (max, min)
     std::make_shared<folly::NamedThreadFactory>("HttpCPUThrdPool"));
 
   // get default server weight according to number of cpu cores
-  unsigned core_num = std::thread::hardware_concurrency();
-  if (core_num <= 0) {
-    LOG(ERROR) << "failed to get hardware_concurrency";
-    default_server_weight_ = DEFAULT_SERVER_WEIGHT;
-  } else {
-    // core_num is positive
-    if (FLAGS_normalize_server_weight == 1) {
-      default_server_weight_ = 5 * sqrt(core_num);
-    } else {
-      default_server_weight_ = core_num;
-    }
+  default_server_weight_ = core_num;
+  if (FLAGS_normalize_server_weight == 1) {
+    default_server_weight_ = 5 * sqrt(core_num);
   }
 
   // register http url routes
@@ -174,6 +155,7 @@ void HttpService::start(const std::string& host, uint16_t port) {
     this->http_server_->start();
   });
   save_config();
+  return true;
 }
 
 void HttpService::stop() {
@@ -209,7 +191,7 @@ void HttpService::load_models(const std::set<ModelRecord> &model_records) {
     }
     // execute model loading async-ly
     http_cpu_thread_pool_->add([this, model_record]() mutable {
-      const bool success = this->predictor_service_->load_model(
+      const bool success = this->model_manager_->load_model(
         model_record.config_name, true, model_record.name, model_record.business_line);
       model_record.state = success ? ModelRecord::State::loaded : ModelRecord::State::failed;
       if (success) {
@@ -309,7 +291,7 @@ void HttpService::register_services(const std::map<std::string, std::set<ModelRe
       }
       // set model_ptr business_line
       for (const auto &model_record : model_records) {
-        if (!predictor_service_->getModelManager().setModelBusinessLine(model_record.name, service_name)) {
+        if (!model_manager_->setModelBusinessLine(model_record.name, service_name)) {
           LOG(ERROR) << "failed to set model=" << model_record.name << " to business_line=" << service_name;
         }
       }
@@ -525,7 +507,7 @@ void HttpService::loadAndRegister(service_framework::http::ServerResponse* respo
   folly::dynamic config;
   // a unioned set of complement models to be loaded, used by load_models()
   try {
-    folly::dynamic json = folly::parseJson(parseIOBuf(std::move(buf)));
+    folly::dynamic json = folly::parseJson(util::parseIOBuf(std::move(buf)));
     auto model_map_locked = model_map_.rlock();
     for (const auto &service : json["services"]) {
       auto service_name = service["service_name"].asString();
@@ -684,7 +666,7 @@ void HttpService::updateDowngradePercent(service_framework::http::ServerResponse
   }
   */
   try {
-    folly::dynamic json = folly::parseJson(parseIOBuf(std::move(buf)));
+    folly::dynamic json = folly::parseJson(util::parseIOBuf(std::move(buf)));
     LOG(INFO) << "updateDowngradePercent request json=" << json;
     auto tmp_map_ptr = std::make_shared<std::map<std::string, int>>();
     for (const auto& item : json.items()) {
@@ -694,7 +676,7 @@ void HttpService::updateDowngradePercent(service_framework::http::ServerResponse
       }
       (*tmp_map_ptr)[item.first.asString()] = itemValue;
     }
-    predictor_service_->set_model_downgrade_percent_map(tmp_map_ptr);
+    model_manager_->set_model_downgrade_percent_map(tmp_map_ptr);
     LOG(INFO) << "updateDowngradePercent has been changed to " << json << ",tmp_map_ptr.size =" << tmp_map_ptr->size();
   }
   catch (const std::exception &e) {
@@ -717,9 +699,9 @@ void HttpService::resetDowngradePercent(service_framework::http::ServerResponse*
                                      std::unique_ptr<proxygen::HTTPMessage> msg) {
   folly::dynamic result = folly::dynamic::object;
   std::string response_result;
-  auto model_downgrade_percent_map_ptr = predictor_service_->get_model_downgrade_percent_map();
+  auto model_downgrade_percent_map_ptr = model_manager_->get_model_downgrade_percent_map();
   if (model_downgrade_percent_map_ptr) {
-    predictor_service_->set_model_downgrade_percent_map(nullptr);
+    model_manager_->set_model_downgrade_percent_map(nullptr);
   }
 
   LOG(INFO) << "reset downgrade_percent success";
@@ -736,7 +718,7 @@ void HttpService::getDowngradePercent(service_framework::http::ServerResponse* r
   std::string response_result;
   folly::dynamic downgrade_obj = folly::dynamic::object;
   try {
-    auto model_downgrade_percent_map_ptr = predictor_service_->get_model_downgrade_percent_map();
+    auto model_downgrade_percent_map_ptr = model_manager_->get_model_downgrade_percent_map();
     if (model_downgrade_percent_map_ptr) {
       for (const auto &kv : *model_downgrade_percent_map_ptr) {
         downgrade_obj[kv.first] = kv.second;
@@ -766,7 +748,7 @@ void HttpService::setStressParams(service_framework::http::ServerResponse* respo
   std::string qps{""};
   std::string service{""};
   try {
-    folly::dynamic json = folly::parseJson(parseIOBuf(std::move(buf)));
+    folly::dynamic json = folly::parseJson(util::parseIOBuf(std::move(buf)));
     model_names = json["model_names"].asString();
     qps = json["qps"].asString();
     service = json["service"].asString();
@@ -844,7 +826,7 @@ void HttpService::reset_service_config(const folly::dynamic &config_object) {
         ResourceMgr::setHeavyTaskThreadPool(value);
       }
       if (cfg_name == REQUEST_CPU_THREAD_NUM) {
-        predictor_service_->getModelManager().setThreadPool(value);
+        model_manager_->setThreadPool(value);
       }
     }
   };
@@ -910,14 +892,15 @@ void HttpService::updateGlobalModelServiceMap(service_framework::http::ServerRes
   }
   */
   try {
-    folly::dynamic json = folly::parseJson(parseIOBuf(std::move(buf)));
+    folly::dynamic json = folly::parseJson(util::parseIOBuf(std::move(buf)));
     LOG(INFO) << "updateGlobalModelServiceMap request json=" << json;
-    auto global_model_service_map_locked = ResourceMgr::global_model_service_map_.wlock();
+    auto global_model_service_map = std::make_shared<ModelServiceMap>();
     for (const auto& item : json.items()) {
-      (*global_model_service_map_locked)[item.first.asString()] = item.second.asString();
+      (*global_model_service_map)[item.first.asString()] = item.second.asString();
     }
+    ResourceMgr::global_model_service_map_.store(global_model_service_map);
     LOG(INFO) << "updateGlobalModelServiceMap has been changed to " << json
-              << ",global_model_service_map.size =" << global_model_service_map_locked->size();
+              << ",global_model_service_map.size =" << global_model_service_map->size();
     result["code"] = 0;
     result["msg"] = "update global_model_service_map success";
   } catch (const std::exception &e) {
@@ -936,8 +919,8 @@ void HttpService::getGlobalModelServiceMap(service_framework::http::ServerRespon
   std::string response_result;
   folly::dynamic info_obj = folly::dynamic::object;
   try {
-    auto global_model_service_map_locked = ResourceMgr::global_model_service_map_.rlock();
-    for (const auto &kv : *global_model_service_map_locked) {
+    auto global_model_service_map = ResourceMgr::global_model_service_map_.load();
+    for (const auto &kv : *global_model_service_map) {
       info_obj[kv.first] = kv.second;
     }
     result["code"] = 0;

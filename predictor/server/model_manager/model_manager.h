@@ -41,6 +41,8 @@ class ModelManager {
   void calculateVector(CalculateVectorResponses* calculate_vector_responses,
                        std::unique_ptr<CalculateVectorRequests> calculate_vector_requests_ptr);
   bool shouldDowngradeModel(const std::string& model_full_name) const;
+  void calculateBatchVector(CalculateBatchVectorResponses* calculate_batch_vector_responses,
+                            std::unique_ptr<CalculateBatchVectorRequests> calculate_batch_vector_requests_ptr);
   std::shared_ptr<std::map<std::string, int>> get_model_downgrade_percent_map() const;
   void set_model_downgrade_percent_map(std::shared_ptr<std::map<std::string, int>> tmp_map_ptr);
   bool setModelBusinessLine(const std::string &model_name, const std::string &business_line);
@@ -53,6 +55,7 @@ class ModelManager {
   std::shared_ptr<std::map<std::string, int>> model_downgrade_percent_map_ptr_;
 
   ResultPair singlePredict(const std::string &model_full_name, const PredictRequest &predict_request) const;
+  CalculateBatchVectorResponse singleCalculateBatchVector(const CalculateBatchVectorRequest &batch_request) const;
 };
 
 }  // namespace predictor
