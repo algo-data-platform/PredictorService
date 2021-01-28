@@ -2,7 +2,7 @@
 set -xe
 
 function get_last_commit_id() {
-  LAST_COMMIT_ORIGIN=`git rev-parse --short origin/master`
+  LAST_COMMIT_ORIGIN=`git rev-parse --short origin/main`
   if [ "" != ""$1 ]; then
     LAST_COMMIT_ORIGIN=$1
   fi
