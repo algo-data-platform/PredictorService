@@ -8,6 +8,7 @@
 #include "predictor/server/feature_extractor/feature_extractor.h"
 #include "predictor/util/predictor_util.h"
 #include "predictor/util/predictor_constants.h"
+#include "predictor/config/config_util.h"
 #include "predictor/global_resource/resource_manager.h"
 
 DECLARE_int64(min_items_per_thread);
@@ -28,8 +29,13 @@ class Model {
   //
   // api functions
   //
-  virtual bool init(const std::string& path_prefix, const rapidjson::Document& document) = 0;
-  virtual bool predict(PredictResponse* predict_response, const PredictRequest& predict_request) { return false;}
+  virtual bool init(const std::string& path_prefix, const rapidjson::Document& document) { return true; }  // old api
+  virtual bool load(const ModelConfig &model_config,
+                    const std::string &model_package_dir,
+                    const std::string &business_line);  // new api
+  virtual bool loadModelFile() { return true; }
+  virtual bool initFeatureExtractor();
+  virtual bool predict(PredictResponse* predict_response, const PredictRequest& predict_request) { return false; }
   virtual bool calculateVector(CalculateVectorResponse* calculate_vector_response,
                                const CalculateVectorRequest& calculate_vector_request) { return false; }
   virtual bool calculateBatchVector(CalculateBatchVectorResponse* batch_response,
@@ -96,6 +102,8 @@ class Model {
   //
   // member variables
   //
+  ModelConfig model_config_;
+  std::string model_package_dir_;
   std::string model_full_name_;
   std::string business_line_;
   std::shared_ptr<FeaExtractInterface> fea_extractor_;  // to be deprecated

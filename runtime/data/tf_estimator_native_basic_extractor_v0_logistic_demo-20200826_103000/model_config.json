@@ -1,0 +1,8 @@
+{
+  "model_framework": "tf",
+  "model_class": "estimator_native",
+  "feature_class": "basic_extractor",
+  "version": "v0",
+  "model_name": "logistic",
+  "additional": "demo"
+}

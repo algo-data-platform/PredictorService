@@ -17,8 +17,12 @@
 
 namespace predictor {
 
-void originalFeatureExtractSnapshot(const PredictRequest& request);
+void originalFeatureSnapshot(const PredictRequest& request);
+void predictRespSnapshot(const PredictResponse& response, const std::string& model_name = "");
+
+void originalFeatureSnapshot(const CalculateVectorRequest& request);
 
 bool shouldSnapshot(const std::string& req_id);
+void generateOriginalFeatures(std::string* ori_features, const std::vector<feature_master::Feature>& feature_list);
 
 }  // namespace predictor

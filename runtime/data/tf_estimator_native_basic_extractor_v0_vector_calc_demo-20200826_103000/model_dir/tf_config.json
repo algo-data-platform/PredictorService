@@ -1,0 +1,7 @@
+{
+  "export_dir": "tf_model",
+  "tags": ["serve"],
+  "signature_def": "predict",
+  "output_tensor_names": ["user/logits/BiasAdd:0", "add:0"],
+  "model_timestamp": "20201221055500"
+}

@@ -1,0 +1,6 @@
+{
+  "export_dir": "tf_model",
+  "tags": ["serve"],
+  "signature_def": "serving_default",
+  "output_tensor_names": ["rank/query/fully_connected/BiasAdd", "rank/bias/fully_connected_1/BiasAdd"]
+}

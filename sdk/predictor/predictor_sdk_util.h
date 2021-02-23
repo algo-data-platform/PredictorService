@@ -51,7 +51,7 @@ static service_router::ClientOption makeServiceRouterClientOptionImpl(const T &r
   return option;
 }
 
-static service_router::ClientOption makeServiceRouterClientOption(const predictor::PredictorClientOption &rhs) {
+static service_router::ClientOption makeServiceRouterClientOption(const PredictorClientOption &rhs) {
   service_router::ClientOption option = makeServiceRouterClientOptionImpl(rhs);
   service_router::ServerAddress target_server_address;
   target_server_address.setHost(rhs.server_ip);
@@ -60,7 +60,7 @@ static service_router::ClientOption makeServiceRouterClientOption(const predicto
   return option;
 }
 
-static service_router::ClientOption makeServiceRouterClientOption(const predictor::RequestOption &rhs) {
+static service_router::ClientOption makeServiceRouterClientOption(const RequestOption &rhs) {
   return makeServiceRouterClientOptionImpl(rhs);
 }
 
@@ -79,8 +79,8 @@ static std::string getReqIds(const std::vector<RequestType> &reqs) {
 //
 // Converting
 //
-static predictor::RequestOption makeRequestOption(const PredictorClientOption &predictor_client_option) {
-  predictor::RequestOption request_option;
+static RequestOption makeRequestOption(const PredictorClientOption &predictor_client_option) {
+  RequestOption request_option;
   request_option.local_ip                       = predictor_client_option.local_ip;
   request_option.connection_timeout             = predictor_client_option.connection_timeout;
   request_option.request_timeout                = predictor_client_option.request_timeout;

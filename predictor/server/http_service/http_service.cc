@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <math.h>
 #include "common/util.h"
+#include "common/file/file_util.h"
 #include "folly/String.h"
 #include "folly/DynamicConverter.h"
 #include "folly/executors/GlobalExecutor.h"
@@ -12,13 +13,13 @@
 #include "predictor/util/predictor_constants.h"
 #include "predictor/global_resource/resource_manager.h"
 #include "predictor/util/predictor_util.h"
+#include "predictor/config/config_util.h"
 
 DEFINE_string(predictor_service_name, "predictor_service_dev", "predictor service name");
 DEFINE_int32(normalize_server_weight, 1, "whether to normalize server weight");
 DEFINE_int32(always_trust_content_service, 1, "always accept what content service has posted");
 DEFINE_bool(enable_service_config, true, "use service config passed by content service");
 
-DECLARE_int32(use_model_service);
 DECLARE_string(service_name);
 DECLARE_int32(port);
 DECLARE_string(host);
@@ -26,8 +27,6 @@ DECLARE_string(qps);
 DECLARE_string(qps_model);
 DECLARE_string(trans_model);
 DECLARE_int32(http_cpu_thread_num);
-DECLARE_int32(use_dynamic_weight);
-DECLARE_int32(use_dynamic_unregister_service);
 DECLARE_int64(tf_thread_num);
 DECLARE_int64(feature_extract_tasks_num);
 DECLARE_int64(heavy_tasks_thread_num);
@@ -191,10 +190,15 @@ void HttpService::load_models(const std::set<ModelRecord> &model_records) {
     }
     // execute model loading async-ly
     http_cpu_thread_pool_->add([this, model_record]() mutable {
-      const bool success = this->model_manager_->load_model(
-        model_record.config_name, true, model_record.name, model_record.business_line);
-      model_record.state = success ? ModelRecord::State::loaded : ModelRecord::State::failed;
-      if (success) {
+      const auto model_package_dir = common::FileUtil::extract_dir(model_record.config_name);
+      std::string &&model_config_filename = common::pathJoin(model_package_dir, MODEL_CONFIG);
+      ModelConfig model_config;
+      util::initFromFile(&model_config, model_config_filename);
+      const bool load_success = this->model_manager_->loadModel(model_config,
+                                                                model_package_dir,
+                                                                model_record.business_line);
+      model_record.state = load_success ? ModelRecord::State::loaded : ModelRecord::State::failed;
+      if (load_success) {
         model_record.success_time = common::currentTimeInFormat("%Y%m%d_%H%M%S");
         model_record.state = ModelRecord::State::loaded;
         LOG(INFO) << "load model=" << model_record.full_name << " succeeded!";
@@ -336,14 +340,14 @@ void HttpService::register_service_name(const std::string &service_name, int ser
   }
   // read service weight dynamically from mysql config, accepting from content service request
   // if mysql config is zero(DEFAULT), we set the weight based on the cpu core number.
-  if (server_weight <= 0 || FLAGS_use_dynamic_weight == 0) {
+  if (server_weight <= 0) {
     server_weight = default_server_weight_;
   }
   auto service_weight_map_locked = service_weight_map_.wlock();
   auto iter = service_weight_map_locked->find(service_name);
   if (iter == service_weight_map_locked->end() || iter->second != server_weight) {
     // if server weight not set or server weight changed then set server weight
-    if (!predictor::util::setServerStaticWeight(service_name, FLAGS_host,
+    if (!util::setServerStaticWeight(service_name, FLAGS_host,
                                                 FLAGS_port, server_weight)) {
       LOG(ERROR) << "failed to set server weight for service_name=" << service_name;
     } else {
@@ -357,11 +361,6 @@ void HttpService::register_service_name(const std::string &service_name, int ser
 
 void HttpService::unregister_services_and_unload_models(const std::set<std::string> &useless_service_names,
   const std::set<std::string> &useless_model_names) {
-  if (FLAGS_use_dynamic_unregister_service == 0) {
-    LOG(INFO) << "FLAGS_use_dynamic_unregister_service switch is closed";
-    return;
-  }
-
   http_cpu_thread_pool_->add([this, useless_service_names, useless_model_names]()  {
     unregister_services(useless_service_names);
     unload_models(useless_model_names);

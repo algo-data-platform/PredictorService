@@ -22,7 +22,6 @@ DEFINE_string(work_mode, predictor::SERVER_MODE, "work mode of server: ServerMod
 DECLARE_string(example_snapshot_producer_config);
 DECLARE_string(fea_extract_snapshot_producer_config);
 DECLARE_string(host);
-DECLARE_int32(use_model_service);
 
 
 namespace predictor {
@@ -31,10 +30,6 @@ bool PredictorService::init() {
   if (!model_manager_) {
     util::logAndMetricError("model_manager_not_initialized");
     return false;
-  }
-
-  if (!FLAGS_use_model_service) {
-    model_manager_->load_all_models();
   }
 
   if (FLAGS_example_snapshot_frequency > 0) {
@@ -57,7 +52,7 @@ bool PredictorService::init() {
 
 void PredictorService::predict(PredictResponses& predict_responses,
                                std::unique_ptr<PredictRequests> predict_requests_ptr) {
-  if (FLAGS_work_mode == predictor::ROUTER_MODE) {
+  if (FLAGS_work_mode == ROUTER_MODE) {
     predictor_router_.predict(&predict_responses, std::move(predict_requests_ptr));
     return;
   }
@@ -78,18 +73,30 @@ void PredictorService::predict(PredictResponses& predict_responses,
     for (const auto& predict_request : predict_requests_ptr->get_reqs()) {
       if (shouldSnapshot(predict_request.get_req_id())) {
         ResourceMgr::getHeavyTasksThreadPool()->addFuture([predict_request]() {
-                                                            originalFeatureExtractSnapshot(predict_request);});
+          originalFeatureSnapshot(predict_request);
+        });
       }
     }
   }
 
   // real predict
   model_manager_->predict_multithread(&predict_responses, std::move(predict_requests_ptr));
+
+  // response feature snapshot
+  if (FLAGS_fea_extract_snapshot_frequency > 0) {
+    for (const auto& predict_response : predict_responses.get_resps()) {
+      if (shouldSnapshot(predict_response.get_req_id())) {
+        ResourceMgr::getHeavyTasksThreadPool()->addFuture([predict_response]() {
+          predictRespSnapshot(predict_response);
+        });
+      }
+    }
+  }
 }
 
 void PredictorService::multiPredict(MultiPredictResponse& multi_predict_response,
                                     std::unique_ptr<MultiPredictRequest> multi_predict_request) {
-  if (FLAGS_work_mode == predictor::ROUTER_MODE) {
+  if (FLAGS_work_mode == ROUTER_MODE) {
     predictor_router_.multiPredict(&multi_predict_response, std::move(multi_predict_request));
     return;
   }
@@ -104,24 +111,46 @@ void PredictorService::multiPredict(MultiPredictResponse& multi_predict_response
     const auto& single_request = multi_predict_request->get_single_request();
     if (shouldSnapshot(single_request.get_req_id())) {
       ResourceMgr::getHeavyTasksThreadPool()->addFuture([single_request]() {
-                                                          originalFeatureExtractSnapshot(single_request);});
+        originalFeatureSnapshot(single_request);
+      });
     }
   }
 
   FB_LOG_EVERY_MS(INFO, 2000) << "calling predictor multiPredict" << std::endl;
   model_manager_->multiPredict(multi_predict_response, std::move(multi_predict_request));
-  return;
+
+  // response feature snapshot
+  if (FLAGS_fea_extract_snapshot_frequency > 0) {
+    if (shouldSnapshot(multi_predict_response.get_req_id())) {
+      for (const auto& model_response : multi_predict_response.model_responses) {
+        ResourceMgr::getHeavyTasksThreadPool()->addFuture([model_response]() {
+          predictRespSnapshot(model_response.second, model_response.first);
+        });
+      }
+    }
+  }
 }
 
 void PredictorService::calculateVector(CalculateVectorResponses& calculate_vector_responses,
                                        std::unique_ptr<CalculateVectorRequests> calculate_vector_requests_ptr) {
-  if (FLAGS_work_mode == predictor::ROUTER_MODE) {
+  if (FLAGS_work_mode == ROUTER_MODE) {
     predictor_router_.calculateVector(&calculate_vector_responses, std::move(calculate_vector_requests_ptr));
     return;
   }
 
   const MetricTagsMap tag_map{{TAG_REQ_TYPE, REQ_TYPE_CALCULATE_VECTOR}};
   metrics::Timer timer(util::buildTimers(TIME_CONSUMING, tag_map));
+
+  // original features and xfea results snapshot
+  if (FLAGS_fea_extract_snapshot_frequency > 0) {
+    for (const auto& calculate_vector_request : calculate_vector_requests_ptr->get_reqs()) {
+      if (shouldSnapshot(calculate_vector_request.get_req_id())) {
+        ResourceMgr::getHeavyTasksThreadPool()->addFuture([calculate_vector_request]() {
+          originalFeatureSnapshot(calculate_vector_request);
+        });
+      }
+    }
+  }
 
   model_manager_->calculateVector(&calculate_vector_responses, std::move(calculate_vector_requests_ptr));
 }
@@ -141,7 +170,7 @@ template<typename T> void PredictorService::send_req_example_snapshot(const T& r
 
 void PredictorService::calculateBatchVector(CalculateBatchVectorResponses& calculate_batch_vector_responses,
                                    std::unique_ptr<CalculateBatchVectorRequests> calculate_batch_vector_requests_ptr) {
-  if (FLAGS_work_mode == predictor::ROUTER_MODE) {
+  if (FLAGS_work_mode == ROUTER_MODE) {
     predictor_router_.calculateBatchVector(&calculate_batch_vector_responses,
                                            std::move(calculate_batch_vector_requests_ptr));
     return;

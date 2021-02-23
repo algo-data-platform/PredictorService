@@ -20,17 +20,15 @@ class ModelFramework {
 
   ModelMap models_;
 
-  virtual bool load(const std::string& path_prefix, const std::string& config_file,
-                    const std::string &model_name, const std::string &business_line);
+  virtual bool load(const ModelConfig &model_config, const std::string &model_package_dir,
+                    const std::string &business_line);
 
   virtual bool predict(PredictResponse* predict_response, const PredictRequest& predict_request,
                        const std::string& model_full_name) const;
 
   virtual bool calculateVector(CalculateVectorResponse* calculate_vector_response,
                                const CalculateVectorRequest& calculate_vector_request,
-                               const std::string& model_full_name) {
-    return false;
-  }
+                               const std::string& model_full_name) const;
 
   virtual bool calculateBatchVector(CalculateBatchVectorResponse* batch_response,
                                const CalculateBatchVectorRequest& batch_request,
