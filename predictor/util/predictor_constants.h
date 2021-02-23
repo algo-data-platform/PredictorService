@@ -12,6 +12,11 @@ namespace predictor {
 constexpr int RC_SUCCESS = 0;
 constexpr int RC_ERROR = -1;
 
+// new config constants
+constexpr char MODEL_CONFIG[] = "model_config.json";
+constexpr char MODEL_DIR[] = "model_dir";
+constexpr char TF_CONFIG[] = "tf_config.json";
+
 // info of config
 constexpr char CONFIG_MODEL_FILE_SUFFIX[] = ".json";
 constexpr char CONFIG_FRAMEWORK_NAME[] = "framework";

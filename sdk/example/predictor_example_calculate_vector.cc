@@ -13,7 +13,7 @@ void constructRequests(std::vector<predictor::CalculateVectorClientRequest>* pre
       // 业务标识
       request.channel = "test";
       // 模型名
-      request.model_name = "tf_estimator_multi_fea_model";
+      request.model_name = "tf_estimator_native_basic_extractor_v0_vector_calc_demo";
       request.output_names = std::vector<std::string>{"user_vec", "bias"};
 
       // 构建request.Features
@@ -80,11 +80,21 @@ int main(int argc, char* argv[]) {
       for (auto& result : results_map) {
         std::cout << "OutputName:" << result.first << " size is:" << result.second.size()<< std::endl;
         auto res = result.second;
+        std::cout << "\tres = [";
         for (int i = 0; i < res.size(); i ++) {
-          std::cout << "res["<< i << "]:" << res[i] <<std::endl;
+          std::cout << res[i] << " ";
         }
+        std::cout << "]" << std::endl;
       }
     }
+    /*  
+      // EXPECTED OUTPUTS ARE:
+      resp.model_timestamp:20201221055500
+      OutputName:bias size is:1
+        res = [-1.14334 ]
+      OutputName:user_vec size is:32
+        res = [1061.27 -32316.6 -55635 28483.1 -24477.3 -91815.1 30770.1 28534.8 45262.6 73146.1 60562.9 37351 -9948.37 -282771 -162472 -82191 39045.4 -45073.3 49138.7 -269480 28617.6 35560.8 15200.9 88546.2 -73168 52228.7 -47212.8 13480.4 -42545.5 -1.93022e+06 41496.5 -2.38457e+06 ]
+    */
   }
   std::this_thread::sleep_for(std::chrono::milliseconds(10000));
   // stop

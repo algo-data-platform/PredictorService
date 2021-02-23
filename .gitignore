@@ -2,6 +2,7 @@
 .Building.lock
 .sconsign.dblite
 .arcconfig
+.vscode/
 blade-bin
 build64_debug
 build64_release/

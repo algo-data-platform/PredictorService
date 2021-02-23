@@ -1,0 +1,9 @@
+{
+  "model_framework": "catboost",
+  "model_class": "catboost_calcer",
+  "feature_class": "basic_extractor",
+  "version": "v0",
+  "model_name": "native",
+  "additional": "demo",
+  "model_file": "catboost.model"
+}

@@ -12,6 +12,3 @@
 -http_server_work_thread_num=10
 -min_ads_per_thread=10
 -request_cpu_thread_num=0
--use_dynamic_weight=1
--use_model_service=1
--use_dynamic_unregister_service=1

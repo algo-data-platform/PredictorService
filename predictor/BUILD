@@ -7,9 +7,7 @@ cc_binary(
         'server/model_manager/framework/model.cc',
         'server/model_manager/framework/model_framework.cc',
         'server/model_manager/framework/tf/tf_framework.cc',
-        'server/model_manager/framework/tf/tf_model_estimator_single_fea.cc',
-        'server/model_manager/framework/tf/tf_model_estimator_multi_fea.cc',
-        'server/model_manager/framework/tf/tf_model_estimator.cc',
+        'server/model_manager/framework/tf/tf_model_estimator_native.cc',
         'server/model_manager/framework/xgboost/xgboost_framework.cc',
         'server/model_manager/framework/xgboost/xgboost_model_tree.cc',
         'server/model_manager/framework/catboost/catboost_framework.cc',
@@ -26,6 +24,7 @@ cc_binary(
         ':predictor_util',
         ':global_resource',
         ':feature_extractor',
+        ':config',
         '//predictor/if:predictor',
         '//feature_master/if:feature_master',
         '//service_router:service_router',
@@ -52,12 +51,12 @@ cc_binary(
 
 
 cc_library(
-        name="xgboost_predictor",
-        extra_linkflags = [ '-fopenmp' ],
-        srcs=[
-            'server/model_manager/framework/xgboost/xgboost_predictor.cc',
-        ],
-        incs = [
+    name="xgboost_predictor",
+    extra_linkflags = [ '-fopenmp' ],
+    srcs=[
+        'server/model_manager/framework/xgboost/xgboost_predictor.cc',
+    ],
+    incs = [
         '../thirdparty/xgboost/include',
         '../thirdparty/xgboost/src/data',
         '../thirdparty/xgboost/src/gbm',
@@ -65,10 +64,10 @@ cc_library(
         '../thirdparty/xgboost/src/common',
         '../thirdparty/xgboost/dmlc-core/include',
         '../thirdparty/xgboost/rabit/include',
-        ],
-        deps = [
-                "//thirdparty/xgboost:xgboost",
-        ],
+    ],
+    deps = [
+        "//thirdparty/xgboost:xgboost",
+    ],
 )
 
 cc_library(
@@ -112,6 +111,7 @@ cc_library(
     srcs=[
         'server/feature_extractor/fea_extract_snapshot.cc',
         'server/feature_extractor/feature_extractor.cc',
+        'server/feature_extractor/basic_extractor.cc',
     ],
     incs=[
         '../thirdparty/protobuf/src',

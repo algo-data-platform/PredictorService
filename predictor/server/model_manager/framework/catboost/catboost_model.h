@@ -8,10 +8,11 @@ namespace predictor {
 class CatboostModel : public Model {
  public:
   virtual ~CatboostModel() = default;
-  bool init(const std::string& path_prefix, const rapidjson::Document& document) override;
+
+  bool loadModelFile() override;
   bool predict(PredictResponse* response, const PredictRequest& request) override;
 
- private:
+ protected:
   ModelCalcerWrapper catboost_calcer_;
 };
 

@@ -176,7 +176,7 @@ struct PredictResponsesThriftFuture {
   virtual std::vector<PredictResponse> get() = 0;
 };
 struct PredictResponsesThriftFutureImpl : PredictResponsesThriftFuture {
-  std::unique_ptr<folly::Future<predictor::PredictResponses>> fut_ptr;
+  std::unique_ptr<folly::Future<PredictResponses>> fut_ptr;
   std::string req_ids;
   std::vector<std::pair<std::string, std::string>> channel_model_names;
   std::string service_name;
@@ -187,7 +187,7 @@ struct MultiPredictResponseFuture {
   virtual MultiPredictResponse get() = 0;
 };
 struct MultiPredictResponseFutureImpl : MultiPredictResponseFuture {
-  std::unique_ptr<folly::Future<predictor::MultiPredictResponse>> fut_ptr;
+  std::unique_ptr<folly::Future<MultiPredictResponse>> fut_ptr;
   std::string req_id;
   std::vector<std::string> model_names;
   std::string channel;
@@ -196,7 +196,7 @@ struct MultiPredictResponseFutureImpl : MultiPredictResponseFuture {
   MultiPredictResponse get();
 };
 struct CalculateVectorResponsesThriftFuture {
-  std::unique_ptr<folly::Future<predictor::CalculateVectorResponses>> fut_ptr;
+  std::unique_ptr<folly::Future<CalculateVectorResponses>> fut_ptr;
   std::string req_ids;
   std::vector<std::pair<std::string, std::string>> channel_model_names;
   std::string service_name;
@@ -204,7 +204,7 @@ struct CalculateVectorResponsesThriftFuture {
 };
 
 struct CalculateBatchVectorResponsesThriftFuture {
-  std::unique_ptr<folly::Future<predictor::CalculateBatchVectorResponses>> fut_ptr;
+  std::unique_ptr<folly::Future<CalculateBatchVectorResponses>> fut_ptr;
   std::string req_ids;
   std::vector<std::pair<std::string, std::string>> channel_model_names;
   std::string service_name;
@@ -318,7 +318,7 @@ struct PredictResponsesFuture {
   virtual std::vector<PredictClientResponse> get() { return {}; }
 };
 struct PredictResponsesFutureImpl : PredictResponsesFuture {
-  std::unique_ptr<folly::Future<predictor::PredictResponses>> fut_ptr;
+  std::unique_ptr<folly::Future<PredictResponses>> fut_ptr;
   std::string req_ids;
   std::vector<std::pair<std::string, std::string>> channel_model_names;
   std::string service_name;

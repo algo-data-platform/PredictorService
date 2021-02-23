@@ -74,7 +74,7 @@ feature_master::Feature featureParse(const PredictFeature& predict_feature) {
 
 PredictRequest PredictClientRequest::toPredictRequest() const {
   // transform client req to predictor req
-  predictor::PredictRequest request;
+  PredictRequest request;
   request.set_req_id(req_id);
   request.set_model_name(model_name);
   request.set_channel(channel);
@@ -94,7 +94,7 @@ PredictRequest PredictClientRequest::toPredictRequest() const {
 
 std::vector<PredictClientResponse> PredictResponsesFutureImpl::get() {
   // blocks until the async call is done
-  predictor::PredictResponses predict_responses;
+  PredictResponses predict_responses;
   try {
     predict_responses = fut_ptr->get();
   } catch (const std::exception& e) {
@@ -173,10 +173,10 @@ PredictFeature parse(const std::string& name, const std::vector<std::string>& va
 bool PredictorClientSDK::predict(std::vector<PredictClientResponse>* client_response_list,
                                  const std::vector<PredictClientRequest>& client_request_list,
                                  const PredictorClientOption &predictor_client_option) {
-  predictor::PredictResponses predict_responses;
-  predictor::PredictRequests predict_requests;
+  PredictResponses predict_responses;
+  PredictRequests predict_requests;
 
-  std::vector<predictor::PredictRequest> request_list;
+  std::vector<PredictRequest> request_list;
   for (const auto& client_request : client_request_list) {
     request_list.emplace_back(std::move(client_request.toPredictRequest()));
     markModelSyncRequestMetrics(client_request.model_name);
@@ -189,7 +189,7 @@ bool PredictorClientSDK::predict(std::vector<PredictClientResponse>* client_resp
   // client predict
   int request_timeout = predictor_client_option.request_timeout;
   service_router::ClientOption option = makeServiceRouterClientOption(predictor_client_option);
-  if (!service_router::thriftServiceCall<predictor::PredictorServiceAsyncClient>(
+  if (!service_router::thriftServiceCall<PredictorServiceAsyncClient>(
           option, [&predict_requests, &predict_responses, request_timeout](auto client) {
             apache::thrift::RpcOptions rpc_options;
             rpc_options.setTimeout(std::chrono::milliseconds(request_timeout));
@@ -197,7 +197,7 @@ bool PredictorClientSDK::predict(std::vector<PredictClientResponse>* client_resp
             // Here we just want to catch logical error, add a log, and throw it again.
             try {
               client->sync_predict(rpc_options, predict_responses, predict_requests);
-            } catch (predictor::PredictException& ex) {
+            } catch (PredictException& ex) {
               FB_LOG_EVERY_MS(ERROR, 2000) << ex.get_message();
               throw ex;
             }
@@ -238,10 +238,10 @@ bool PredictorClientSDK::predict(std::vector<PredictClientResponse>* client_resp
 bool PredictorClientSDK::future_predict(std::unique_ptr<PredictResponsesFuture>* predictor_responses_future,
                                         const std::vector<PredictClientRequest>& client_request_list,
                                         const PredictorClientOption &predictor_client_option) {
-  predictor::PredictRequests predict_requests;
+  PredictRequests predict_requests;
 
   std::stringstream req_ids_ss;
-  std::vector<predictor::PredictRequest> request_list;
+  std::vector<PredictRequest> request_list;
   for (const auto& client_request : client_request_list) {
     req_ids_ss << client_request.req_id << " ";
     request_list.emplace_back(std::move(client_request.toPredictRequest()));
@@ -257,7 +257,7 @@ bool PredictorClientSDK::future_predict(std::unique_ptr<PredictResponsesFuture>*
   // client predict
   int request_timeout = predictor_client_option.request_timeout;
   service_router::ClientOption option = makeServiceRouterClientOption(predictor_client_option);
-  if (!service_router::thriftServiceCall<predictor::PredictorServiceAsyncClient>(
+  if (!service_router::thriftServiceCall<PredictorServiceAsyncClient>(
          option,
          [&predict_requests, &predictor_responses_future, &req_ids, request_timeout,
           &service_name](auto client) {
@@ -267,7 +267,7 @@ bool PredictorClientSDK::future_predict(std::unique_ptr<PredictResponsesFuture>*
             // Here we just want to catch logical error, add a log, and throw it again.
             try {
               auto fut_impl = std::make_unique<PredictResponsesFutureImpl>();
-              fut_impl->fut_ptr = std::move(std::make_unique<folly::Future<predictor::PredictResponses>>(
+              fut_impl->fut_ptr = std::move(std::make_unique<folly::Future<PredictResponses>>(
                   client->future_predict(rpc_options, predict_requests)));
               fut_impl->req_ids = req_ids;
               fut_impl->service_name = service_name;
@@ -276,7 +276,7 @@ bool PredictorClientSDK::future_predict(std::unique_ptr<PredictResponsesFuture>*
                                                                            predict_request.get_model_name()));
               }
               *predictor_responses_future = std::move(fut_impl);
-            } catch (predictor::PredictException& ex) {
+            } catch (PredictException& ex) {
               FB_LOG_EVERY_MS(ERROR, 2000) << ex.get_message();
               throw ex;
             }
@@ -295,7 +295,7 @@ bool PredictorClientSDK::future_predict(std::unique_ptr<PredictResponsesFuture>*
 
 CalculateVectorRequest CalculateVectorClientRequest::toCalculateVectorRequest() const {
   // transform client req to predictor req
-  predictor::CalculateVectorRequest request;
+  CalculateVectorRequest request;
   request.set_req_id(req_id);
   request.set_model_name(model_name);
   request.set_channel(channel);
@@ -309,7 +309,7 @@ CalculateVectorRequest CalculateVectorClientRequest::toCalculateVectorRequest() 
 
 CalculateBatchVectorRequest CalculateBatchVectorClientRequest::toCalculateBatchVectorRequest() const {
   // transform client req to predictor req
-  predictor::CalculateBatchVectorRequest request;
+  CalculateBatchVectorRequest request;
   request.set_req_id(req_id);
   request.set_model_name(model_name);
   request.set_channel(channel);
@@ -349,10 +349,10 @@ void packCalculaterClientResponses(std::vector<ClientResponseType>* client_respo
 bool PredictorClientSDK::calculate_vector(std::vector<CalculateVectorClientResponse>* client_response_list,
                                  const std::vector<CalculateVectorClientRequest>& client_request_list,
                                  const PredictorClientOption &predictor_client_option) {
-  predictor::CalculateVectorResponses calculate_vector_responses;
-  predictor::CalculateVectorRequests calculate_vector_requests;
+  CalculateVectorResponses calculate_vector_responses;
+  CalculateVectorRequests calculate_vector_requests;
 
-  std::vector<predictor::CalculateVectorRequest> request_list;
+  std::vector<CalculateVectorRequest> request_list;
   for (const auto& client_request : client_request_list) {
     request_list.emplace_back(std::move(client_request.toCalculateVectorRequest()));
     markModelSyncRequestMetrics(client_request.model_name);
@@ -364,7 +364,7 @@ bool PredictorClientSDK::calculate_vector(std::vector<CalculateVectorClientRespo
   // client predict
   int request_timeout = predictor_client_option.request_timeout;
   service_router::ClientOption option = makeServiceRouterClientOption(predictor_client_option);
-  if (!service_router::thriftServiceCall<predictor::PredictorServiceAsyncClient>(
+  if (!service_router::thriftServiceCall<PredictorServiceAsyncClient>(
           option, [&calculate_vector_requests, &calculate_vector_responses, request_timeout](auto client) {
             apache::thrift::RpcOptions rpc_options;
             rpc_options.setTimeout(std::chrono::milliseconds(request_timeout));
@@ -372,7 +372,7 @@ bool PredictorClientSDK::calculate_vector(std::vector<CalculateVectorClientRespo
             // Here we just want to catch logical error, add a log, and throw it again.
             try {
               client->sync_calculateVector(rpc_options, calculate_vector_responses, calculate_vector_requests);
-            } catch (predictor::CalculateVectorException& ex) {
+            } catch (CalculateVectorException& ex) {
               FB_LOG_EVERY_MS(ERROR, 2000) << ex.get_message();
               throw ex;
             }
@@ -413,10 +413,10 @@ bool PredictorClientSDK::calculate_vector(std::vector<CalculateVectorClientRespo
 bool PredictorClientSDK::calculate_batch_vector(std::vector<CalculateBatchVectorClientResponse>* client_response_list,
                                  const std::vector<CalculateBatchVectorClientRequest>& client_request_list,
                                  const PredictorClientOption &predictor_client_option) {
-  predictor::CalculateBatchVectorResponses batch_responses;
-  predictor::CalculateBatchVectorRequests batch_requests;
+  CalculateBatchVectorResponses batch_responses;
+  CalculateBatchVectorRequests batch_requests;
 
-  std::vector<predictor::CalculateBatchVectorRequest> request_list;
+  std::vector<CalculateBatchVectorRequest> request_list;
   for (const auto& client_request : client_request_list) {
     request_list.emplace_back(std::move(client_request.toCalculateBatchVectorRequest()));
     markModelSyncRequestMetrics(client_request.model_name);
@@ -428,7 +428,7 @@ bool PredictorClientSDK::calculate_batch_vector(std::vector<CalculateBatchVector
   // client predict
   int request_timeout = predictor_client_option.request_timeout;
   service_router::ClientOption option = makeServiceRouterClientOption(predictor_client_option);
-  const bool rc = service_router::thriftServiceCall<predictor::PredictorServiceAsyncClient>(
+  const bool rc = service_router::thriftServiceCall<PredictorServiceAsyncClient>(
           option, [&batch_requests, &batch_responses, request_timeout](auto client) {
             apache::thrift::RpcOptions rpc_options;
             rpc_options.setTimeout(std::chrono::milliseconds(request_timeout));
@@ -436,7 +436,7 @@ bool PredictorClientSDK::calculate_batch_vector(std::vector<CalculateBatchVector
             // Here we just want to catch logical error, add a log, and throw it again.
             try {
               client->sync_calculateBatchVector(rpc_options, batch_responses, batch_requests);
-            } catch (predictor::CalculateVectorException& ex) {
+            } catch (CalculateVectorException& ex) {
               FB_LOG_EVERY_MS(ERROR, 2000) << ex.get_message();
               throw ex;
             }

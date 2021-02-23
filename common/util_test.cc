@@ -62,4 +62,16 @@ TEST_F(CommonUtilTest, SplitSlice) {
   EXPECT_EQ(ranges3[0].begin, 0);
   EXPECT_EQ(ranges3[0].end, 4);
 }
+
+TEST_F(CommonUtilTest, pathJoin) {
+  EXPECT_EQ(common::pathJoin("a", "b"), "a/b");
+  EXPECT_EQ(common::pathJoin("a/", "b"), "a/b");
+  EXPECT_EQ(common::pathJoin("a", "b/"), "a/b/");
+  EXPECT_EQ(common::pathJoin("a", "b", "c"), "a/b/c");
+  EXPECT_EQ(common::pathJoin("a/", "b/", "c/"), "a/b/c/");
+  EXPECT_EQ(common::pathJoin("a/", "b", "c"), "a/b/c");
+  EXPECT_EQ(common::pathJoin("a", "b/", "c"), "a/b/c");
+  EXPECT_EQ(common::pathJoin("a/", "b/", "c"), "a/b/c");
+  EXPECT_EQ(common::pathJoin("a", "b/", "c/"), "a/b/c/");
+}
 }  // namespace common

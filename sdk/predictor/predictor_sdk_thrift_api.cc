@@ -25,7 +25,7 @@ DECLARE_int32(thrift_connection_retry);
 namespace predictor {
 std::vector<PredictResponse> PredictResponsesThriftFutureImpl::get() {
   // blocks until the async call is done
-  predictor::PredictResponses predict_responses;
+  PredictResponses predict_responses;
   try {
     predict_responses = fut_ptr->get();
   } catch (const std::exception& e) {
@@ -45,9 +45,9 @@ std::vector<PredictResponse> PredictResponsesThriftFutureImpl::get() {
   return responses;
 }
 
-predictor::MultiPredictResponse MultiPredictResponseFutureImpl::get() {
+MultiPredictResponse MultiPredictResponseFutureImpl::get() {
   // blocks until the async call is done
-  predictor::MultiPredictResponse predict_response;
+  MultiPredictResponse predict_response;
   try {
     predict_response = fut_ptr->get();
   } catch (const std::exception& e) {
@@ -67,7 +67,7 @@ predictor::MultiPredictResponse MultiPredictResponseFutureImpl::get() {
 
 std::vector<CalculateVectorResponse> CalculateVectorResponsesThriftFuture::get() {
   // blocks until the async call is done
-  predictor::CalculateVectorResponses calculate_vector_responses;
+  CalculateVectorResponses calculate_vector_responses;
   try {
     calculate_vector_responses = fut_ptr->get();
   } catch (const std::exception& e) {
@@ -90,7 +90,7 @@ std::vector<CalculateVectorResponse> CalculateVectorResponsesThriftFuture::get()
 
 std::vector<CalculateBatchVectorResponse> CalculateBatchVectorResponsesThriftFuture::get() {
   // blocks until the async call is done
-  predictor::CalculateBatchVectorResponses calculate_batch_vector_responses;
+  CalculateBatchVectorResponses calculate_batch_vector_responses;
   try {
     calculate_batch_vector_responses = fut_ptr->get();
   } catch (const std::exception& e) {
@@ -167,16 +167,16 @@ bool PredictorClientSDK::predict(std::vector<PredictResponse>* responses,
   const auto& request_option = requests.get_request_option();
   const auto &reqs = requests.get_reqs();
   markMeters(SYNC_REQ_METER, reqs, request_option.predictor_service_name);
-  predictor::PredictResponses predict_responses;
+  PredictResponses predict_responses;
   // client predict
-  const bool rc = service_router::thriftServiceCall<predictor::PredictorServiceAsyncClient>(
+  const bool rc = service_router::thriftServiceCall<PredictorServiceAsyncClient>(
     makeServiceRouterClientOption(request_option),
     [&requests, &predict_responses, &request_option](auto client) {
       apache::thrift::RpcOptions rpc_options;
       rpc_options.setTimeout(std::chrono::milliseconds(request_option.request_timeout));
       try {
         client->sync_predict(rpc_options, predict_responses, requests);
-      } catch (predictor::PredictException& ex) {
+      } catch (PredictException& ex) {
         FB_LOG_EVERY_MS(ERROR, 2000) << ex.get_message();
         throw ex;
       }
@@ -205,14 +205,14 @@ bool PredictorClientSDK::future_predict(std::unique_ptr<PredictResponsesThriftFu
   const auto &reqs = requests.get_reqs();
   markMeters(ASYNC_REQ_METER, reqs, request_option.predictor_service_name);
   // client predict
-  const bool rc = service_router::thriftServiceCall<predictor::PredictorServiceAsyncClient>(
+  const bool rc = service_router::thriftServiceCall<PredictorServiceAsyncClient>(
     makeServiceRouterClientOption(request_option),
     [&requests, &response_future, &request_option, &reqs](auto client) {
       apache::thrift::RpcOptions rpc_options;
       rpc_options.setTimeout(std::chrono::milliseconds(request_option.request_timeout));
       try {
         auto fut_impl = std::make_unique<PredictResponsesThriftFutureImpl>();
-        fut_impl->fut_ptr = std::move(std::make_unique<folly::Future<predictor::PredictResponses>>(
+        fut_impl->fut_ptr = std::move(std::make_unique<folly::Future<PredictResponses>>(
             client->future_predict(rpc_options, requests)));
         fut_impl->req_ids = getReqIds(reqs);
         fut_impl->service_name = request_option.predictor_service_name;
@@ -220,7 +220,7 @@ bool PredictorClientSDK::future_predict(std::unique_ptr<PredictResponsesThriftFu
           fut_impl->channel_model_names.emplace_back(req.get_channel(), req.get_model_name());
         }
         *response_future = std::move(fut_impl);
-      } catch (predictor::PredictException& ex) {
+      } catch (PredictException& ex) {
         FB_LOG_EVERY_MS(ERROR, 2000) << ex.get_message();
         throw ex;
       }
@@ -241,14 +241,14 @@ bool PredictorClientSDK::multi_predict(MultiPredictResponse* response,
   markMeters(ASYNC_REQ_METER, request.get_model_names(), request.get_single_request().get_channel(),
              request_option.predictor_service_name);
   // client predict
-  const bool rc = service_router::thriftServiceCall<predictor::PredictorServiceAsyncClient>(
+  const bool rc = service_router::thriftServiceCall<PredictorServiceAsyncClient>(
     makeServiceRouterClientOption(request_option),
     [&request, &response, &request_option](auto client) {
       apache::thrift::RpcOptions rpc_options;
       rpc_options.setTimeout(std::chrono::milliseconds(request_option.request_timeout));
       try {
         client->sync_multiPredict(rpc_options, *response, request);
-      } catch (predictor::PredictException& ex) {
+      } catch (PredictException& ex) {
         FB_LOG_EVERY_MS(ERROR, 2000) << ex.get_message();
         throw ex;
       }
@@ -279,7 +279,7 @@ bool PredictorClientSDK::future_multi_predict(std::unique_ptr<MultiPredictRespon
              request_option.predictor_service_name, request_type);
 
   // client predict
-  const bool rc = service_router::thriftServiceCall<predictor::PredictorServiceAsyncClient>(
+  const bool rc = service_router::thriftServiceCall<PredictorServiceAsyncClient>(
     makeServiceRouterClientOption(request_option),
     [&request, &response_future, &request_option, &request_type](auto client) {
       apache::thrift::RpcOptions rpc_options;
@@ -294,7 +294,7 @@ bool PredictorClientSDK::future_multi_predict(std::unique_ptr<MultiPredictRespon
         fut_impl->model_names = request.get_model_names();
         fut_impl->channel = request.get_single_request().get_channel();
         *response_future = std::move(fut_impl);
-      } catch (predictor::PredictException& ex) {
+      } catch (PredictException& ex) {
         FB_LOG_EVERY_MS(ERROR, 2000) << "caught PredictException: " << ex.get_message();
         throw ex;
       }
@@ -316,14 +316,14 @@ bool PredictorClientSDK::future_calculate_vector(
   markMeters(ASYNC_REQ_METER, reqs, request_option.predictor_service_name);
 
   // client predict
-  const bool rc = service_router::thriftServiceCall<predictor::PredictorServiceAsyncClient>(
+  const bool rc = service_router::thriftServiceCall<PredictorServiceAsyncClient>(
     makeServiceRouterClientOption(request_option),
     [&requests, &response_future, &request_option, &reqs](auto client) {
       apache::thrift::RpcOptions rpc_options;
       rpc_options.setTimeout(std::chrono::milliseconds(request_option.request_timeout));
       try {
         auto fut_impl = std::make_unique<CalculateVectorResponsesThriftFuture>();
-        fut_impl->fut_ptr = std::move(std::make_unique<folly::Future<predictor::CalculateVectorResponses>>(
+        fut_impl->fut_ptr = std::move(std::make_unique<folly::Future<CalculateVectorResponses>>(
             client->future_calculateVector(rpc_options, requests)));
         fut_impl->req_ids = getReqIds(reqs);
         fut_impl->service_name = request_option.predictor_service_name;
@@ -331,7 +331,7 @@ bool PredictorClientSDK::future_calculate_vector(
           fut_impl->channel_model_names.emplace_back(req.get_channel(), req.get_model_name());
         }
         *response_future = std::move(fut_impl);
-      } catch (predictor::CalculateVectorException& ex) {
+      } catch (CalculateVectorException& ex) {
         FB_LOG_EVERY_MS(ERROR, 2000) << ex.get_message();
         throw ex;
       }
@@ -355,7 +355,7 @@ bool PredictorClientSDK::future_calculate_batch_vector(
   // client predict
   service_router::ClientOption option = makeServiceRouterClientOption(request_option);
   const bool rc = service_router::thriftServiceCall<
-          predictor::PredictorServiceAsyncClient>(
+          PredictorServiceAsyncClient>(
           option,
           [&batch_requests, &batch_responses_future,
            &request_option, &reqs](auto client) {
@@ -363,7 +363,7 @@ bool PredictorClientSDK::future_calculate_batch_vector(
             rpc_options.setTimeout(std::chrono::milliseconds(request_option.request_timeout));
             try {
               auto fut_impl = std::make_unique<CalculateBatchVectorResponsesThriftFuture>();
-              fut_impl->fut_ptr = std::move(std::make_unique<folly::Future<predictor::CalculateBatchVectorResponses>>(
+              fut_impl->fut_ptr = std::move(std::make_unique<folly::Future<CalculateBatchVectorResponses>>(
                   client->future_calculateBatchVector(rpc_options, batch_requests)));
               fut_impl->req_ids = getReqIds(reqs);
               fut_impl->service_name = request_option.predictor_service_name;
@@ -372,7 +372,7 @@ bool PredictorClientSDK::future_calculate_batch_vector(
                                                                           batch_request.get_model_name()));
               }
               *batch_responses_future = std::move(fut_impl);
-            } catch (predictor::CalculateVectorException& ex) {
+            } catch (CalculateVectorException& ex) {
               FB_LOG_EVERY_MS(ERROR, 2000) << ex.get_message();
               throw ex;
             }

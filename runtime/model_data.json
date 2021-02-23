@@ -4,29 +4,30 @@
       "service_name": "predictor_service_dev",
       "service_weight": 0,
       "model_records": [
-        {
-          "name": "catboost_direct_v0_demo_model",
+	      {
+          "name": "tf_estimator_native_basic_extractor_v0_logistic_demo",
           "timestamp": "20200826_103000",
-          "fullName": "catboost_direct_v0_demo_model-20200826_103000",
-          "configName": "./data/catboost_direct_v0_demo_model-20200826_103000/catboost_direct_v0_demo_model.json",
+          "fullName": "tf_estimator_native_basic_extractor_v0_logistic_demo-20200826_103000",
+          "configName": "./data/tf_estimator_native_basic_extractor_v0_logistic_demo-20200826_103000/model_config.json",
+          "is_locked": 0,
+          "md5": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        
+	      {
+          "name": "tf_estimator_native_basic_extractor_v0_vector_calc_demo",
+          "timestamp": "20200826_103000",
+          "fullName": "tf_estimator_native_basic_extractor_v0_vector_calc_demo-20200826_103000",
+          "configName": "./data/tf_estimator_native_basic_extractor_v0_vector_calc_demo-20200826_103000/model_config.json",
+          "is_locked": 0,
+          "md5": "xgthahjksduyeebasd"
+        },
+        {
+          "name": "catboost_catboost_calcer_basic_extractor_v0_native_demo",
+          "timestamp": "20200826_103000",
+          "fullName": "catboost_catboost_calcer_basic_extractor_v0_native_demo-20200826_103000",
+          "configName": "./data/catboost_catboost_calcer_basic_extractor_v0_native_demo-20200826_103000/model_config.json",
           "is_locked": 0,
           "md5": "10234qwert"
-        },
-	      {
-          "name": "tf_estimator_multi_fea_model",
-          "timestamp": "20200826_103000",
-          "fullName": "tf_estimator_multi_fea_model-20200826_103000",
-          "configName": "./data/tf_estimator_multi_fea_model-20200826_103000/tf_estimator_multi_fea_model.json",
-          "is_locked": 0,
-          "md5": "d41d8cd98f00b204e9800998ecf8427e"
-        },
-	      {
-          "name": "tf_estimator_single_fea_model",
-          "timestamp": "20200826_103000",
-          "fullName": "tf_estimator_single_fea_model-20200826_103000",
-          "configName": "./data/tf_estimator_single_fea_model-20200826_103000/tf_estimator_single_fea_model.json",
-          "is_locked": 0,
-          "md5": "d41d8cd98f00b204e9800998ecf8427e"
         }
       ]
     }

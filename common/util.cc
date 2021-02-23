@@ -46,7 +46,11 @@ bool toJson(std::string* result, const folly::dynamic& data) {
   return true;
 }
 
+// poor-man's implementation of pathJoin, but it works
 std::string pathJoin(const std::string& a, const std::string& b) { return a.back() == '/' ? (a + b) : (a + "/" + b); }
+std::string pathJoin(const std::string& a, const std::string& b, const std::string& c) {
+  return pathJoin(a, pathJoin(b, c));
+}
 
 std::time_t currentTimeInMs() {
   std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> tp =

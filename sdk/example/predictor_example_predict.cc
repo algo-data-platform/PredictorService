@@ -5,12 +5,12 @@
 void constructRequest(predictor::PredictClientRequest* request_ptr) {
   request_ptr->channel = "test";
   request_ptr->req_id = "100";
-  request_ptr->model_name = "tf_estimator_single_fea_model";
+  request_ptr->model_name = "tf_estimator_native_basic_extractor_v0_logistic_demo";
   // user level/common features
   request_ptr->common_feature.emplace_back(predictor::client_util::parse("gender", "1"));
   request_ptr->common_feature.emplace_back(predictor::client_util::parse("plat", "5"));
 
-  // ad level/item features
+  // item level/item features
   std::vector<predictor::PredictFeature> item_feature_list;
   item_feature_list.push_back(predictor::client_util::parse("cuid", "1191965271"));
   item_feature_list.push_back(predictor::client_util::parse("ctr1", 147.0));
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
   } else {
     std::cout << "sync_predict successful!" << std::endl;
     for (const auto& resp : client_response_list[0].item_results) {
-      std::cout << resp.first << ":" << resp.second << std::endl;
+      std::cout << resp.first << ":" << resp.second << std::endl;  // response ctr should be 0.155444
     }
   }
 
@@ -72,8 +72,8 @@ int main(int argc, char* argv[]) {
     } else {
       std::cout << "async_predict successful!" << std::endl;
       for (const auto& resp : client_response_list[0].item_results) {
-      std::cout << resp.first << ":" << resp.second << std::endl;
-    }
+        std::cout << resp.first << ":" << resp.second << std::endl;  // response ctr should be 0.155444
+      }
     }
   }
 

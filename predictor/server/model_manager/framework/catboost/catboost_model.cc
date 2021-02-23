@@ -11,26 +11,19 @@ DECLARE_int64(heavy_tasks_thread_num);
 DECLARE_int64(feature_extract_tasks_num);
 
 namespace predictor {
-bool CatboostModel::init(const std::string& path_prefix, const rapidjson::Document& document) {
-  if (!document.HasMember(COMMON_MODEL_FILE)) {
-    LOG(ERROR) << "cannot find key=" << COMMON_MODEL_FILE << "in config file=" << path_prefix;
-    return false;
-  }
-  catboost_calcer_.InitFromFile(common::pathJoin(path_prefix, document[COMMON_MODEL_FILE].GetString()));
-  return true;
+
+bool CatboostModel::loadModelFile() {
+  return catboost_calcer_.InitFromFile(common::pathJoin(model_package_dir_, model_config_.model_file));
 }
 
 bool CatboostModel::predict(PredictResponse* response, const PredictRequest& request) {
-  response->set_req_id(request.get_req_id());  // set req_id in response regardless
   if (request.get_item_features().empty()) {
-    LOG(INFO) << "request item_features are empty, nothing to do, model_full_name=" << model_full_name_
-              << ", req_id=" << request.get_req_id();
     return true;
   }
-
+  // this specific model does not require feature extraction
   std::vector<common::Range> range_vec;
   common::split_slice(&range_vec, request.get_item_features().size(),
-                    FLAGS_min_items_per_thread, FLAGS_feature_extract_tasks_num);
+                      FLAGS_min_items_per_thread, FLAGS_feature_extract_tasks_num);
   std::vector<folly::Future<PredRes> > future_results;
   for (const auto& range : range_vec) {
     auto range_predict = [this, range, &request]() mutable {
@@ -62,7 +55,8 @@ bool CatboostModel::predict(PredictResponse* response, const PredictRequest& req
         try {
           preds["ctr"] = catboost_calcer_.Calc(float_features, cat_features);  // Calc() can throw
         } catch(const std::exception &e) {
-          FB_LOG_EVERY_MS(ERROR, 2000) << "catboost_calcer_.Calc() threw exception=" << e.what()
+          FB_LOG_EVERY_MS(ERROR, 2000)
+            << "catboost_calcer_.Calc() threw exception=" << e.what()
             << ", model_full_name=" << model_full_name_ << ", req_id=" << request.get_req_id();
           continue;
         }
@@ -94,5 +88,6 @@ bool CatboostModel::predict(PredictResponse* response, const PredictRequest& req
   response->set_results_map(std::move(results_map));
   return true;
 }
-REGISTER_MODEL(CatboostModel, catboost).describe("This is catboost model of catboost framework.");
+
+REGISTER_MODEL(CatboostModel, catboost_calcer).describe("This is catboost_calcer model of catboost framework.");
 };  // namespace predictor

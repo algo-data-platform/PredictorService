@@ -8,10 +8,7 @@
 #include "feature_master/parameter/parameter_extractor.h"
 #include <any>
 #include "common/util.h"
-
-
 namespace predictor {
-
 template<class T>
 T* getPtrFromAny(const std::any& a) {
   T *ptr;
@@ -32,7 +29,7 @@ class FeatureExtractor {
  public:
   virtual ~FeatureExtractor() = default;
 
-  virtual bool init(const std::string& path_prefix, const rapidjson::Document& document) = 0;
+  virtual bool init(const std::string& model_package_dir) = 0;
 
   //  抽取公共特征
   virtual bool extractCommonFeatures(const std::any& extracted_features_ptr,

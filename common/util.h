@@ -18,6 +18,7 @@ bool fromJson(folly::dynamic* result, const folly::StringPiece& json);
 bool toJson(std::string* result, const folly::dynamic& data);
 
 std::string pathJoin(const std::string &a, const std::string &b);
+std::string pathJoin(const std::string& a, const std::string& b, const std::string& c);
 
 std::time_t currentTimeInMs();
 

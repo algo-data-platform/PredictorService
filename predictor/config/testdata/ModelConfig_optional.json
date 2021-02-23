@@ -1,0 +1,7 @@
+{
+  "model_framework": "tf",
+  "model_class": "estimator_multi",
+  "feature_class": "xfea_extractor",
+  "version": "v0",
+  "model_name": "cpl_ctr"
+}
