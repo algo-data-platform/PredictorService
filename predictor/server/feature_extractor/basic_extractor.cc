@@ -2,12 +2,12 @@
 
 namespace predictor {
 
-using FeatureMatserMap = std::unordered_map<std::string, const feature_master::Feature*>;
+using FeatureMasterMap = std::unordered_map<std::string, const feature_master::Feature*>;
 
 bool BasicExtractor::extractItemFeatures(const std::any& extracted_features_ptr,
                           const std::vector<feature_master::Feature>& item_features,
                           const std::vector<feature_master::Feature>& common_features) {
-  auto fea_map = getPtrFromAny<FeatureMatserMap>(extracted_features_ptr);
+  auto fea_map = getPtrFromAny<FeatureMasterMap>(extracted_features_ptr);
   if (!fea_map) {
     FB_LOG_EVERY_MS(ERROR, 2000) << "Invalid extracted_feature type!";
     return false;

@@ -7,9 +7,9 @@
 
 namespace predictor {
 
-using FeatureMatserMap = std::unordered_map<std::string, const feature_master::Feature*>;
+using FeatureMasterMap = std::unordered_map<std::string, const feature_master::Feature*>;
 
-class TFModelEstimatorNative : public TFModelBase<FeatureMatserMap> {
+class TFModelEstimatorNative : public TFModelBase<FeatureMasterMap> {
  public:
   TFModelEstimatorNative() = default;
   virtual ~TFModelEstimatorNative() = default;
@@ -17,7 +17,7 @@ class TFModelEstimatorNative : public TFModelBase<FeatureMatserMap> {
 
  protected:
   bool tfCalculateOutputs(std::vector<tensorflow::Tensor>* outputs,
-                          const std::vector<std::pair<int64_t, FeatureMatserMap> >& examples) override;
+                          const std::vector<std::pair<int64_t, FeatureMasterMap> >& examples) override;
   bool buildTfCache() override { return true; }
   template <class StdType, class TensorType>
   static bool buildTensor(tensorflow::Tensor *tensor,
