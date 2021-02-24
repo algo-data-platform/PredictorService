@@ -13,7 +13,7 @@ namespace predictor {
 
 bool TFModelEstimatorNative::tfCalculateOutputs(
   std::vector<tensorflow::Tensor>* outputs,
-  const std::vector<std::pair<int64_t, FeatureMatserMap> >& item_features) {
+  const std::vector<std::pair<int64_t, FeatureMasterMap> >& item_features) {
   // construct tf inputs by item_features
   std::vector<std::pair<std::string, tensorflow::Tensor>> inputs;
   for (const auto& input : inputs_map_) {
